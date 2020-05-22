@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Baby Monitor</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+
+
+    </div>
+    <div class="row">
+        <div id="streams">
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+<script type='text/javascript' src='javascripts/jsmpeg.min.js'></script>
+<script>
+
+    function castSleep() {
+        // cast('white_noise.mp3', 'af3e623c-3215-c7ea-26b0-c2661ee9bad9.local')
+        //study
+        cast('white_noise.mp3', '6ae559b6-aa5e-7a15-108b-6b8379dc43f7.local')
+        // Office TV
+        // cast('white_noise.mp3', 'd66975bc-4a97-be29-9b9b-d71bfc19eceb.local')
+    }
+
+    function castBedtime() {
+        // cast('dream.mp3', 'e2b0f357-96f1-8572-8db6-bf96a7c17644.local')
+    }
+
+    let devices = []
+    let files = []
+    let streams = []
+
+    let players = [];
+
+    function cast(song, deviceId) {
+        const action = "startCast";
+        socket.send(JSON.stringify({action, song, deviceId}))
+    }
+
+    function fetchDevices() {
+        socket.send(JSON.stringify({action: 'listDevices'}))
+    }
+
+    function renderStreams() {
+        players.forEach(player => {
+            player.stop()
+        })
+        players = []
+        let streamsDiv = document.getElementById('streams');
+        streamsDiv.innerHTML = ''
+
+        streams.forEach(stream => {
+            let canvas = document.createElement('canvas')
+            streamsDiv.append(canvas)
+            const {streamWsPort} = stream
+            players.push(new JSMpeg.Player(`ws://${window.location.hostname}:${streamWsPort}`, {
+                    canvas: canvas // Canvas should be a canvas DOM element
+                }));
+        })
+    }
+    function reRender() {
+        renderStreams()
+    }
+
+    const socket = new WebSocket(`ws://${window.location.hostname}:3000/ws`)
+    socket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        switch (data.action) {
+            case 'listDevices':
+                devices = data.value
+                break
+            case "listFiles":
+                files = data.value
+                break
+            case 'listStreams':
+                streams = data.value
+                break
+        }
+        reRender()
+        console.log(data)
+    }
+
+</script>
+</body>
+</html>
