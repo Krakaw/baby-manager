@@ -11,16 +11,23 @@ client.on('device', (device) => {
         console.log('Resuming', e)
       })
     })
+    device.on('status', (status) => {
+      if (device._statusCallback) {
+        device._statusCallback(status)
+      }
+    })
   }
 })
+
 function refreshDevices () {
   client.update()
 }
 
-function castMedia (device, url, callback) {
+function castMedia (device, url, playCallback, statusCallback) {
   console.log(`Playing ${url} on your ${device.friendlyName}`)
   device._url = url
-  device.play(url, callback)
+  device._statusCallback = statusCallback
+  device.play(url, playCallback)
 }
 
 module.exports = {

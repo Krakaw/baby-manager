@@ -2,12 +2,13 @@ const WebSocket = require('ws')
 const cast = require('../helpers/cast')
 const files = require('../helpers/files')
 
-const ACTION_START_CAST = 'startCast'
-const ACTION_ADD_STREAM = 'addStream'
-const ACTION_LIST_STREAMS = 'listStreams'
-const ACTION_LIST_FILES = 'listFiles'
-const ACTION_LIST_DEVICES = 'listDevices'
-const ACTION_LIST_CASTS = 'listCasts'
+const ACTION_CAST_STATUS = 'castStatus'
+const ACTION_CAST_START = 'castStart'
+const ACTION_CAST_LIST = 'castList'
+const ACTION_STREAM_ADD = 'streamAdd'
+const ACTION_STREAM_LIST = 'streamList'
+const ACTION_FILE_LIST = 'fileList'
+const ACTION_DEVICE_LIST = 'deviceList'
 
 function initialize (server, app) {
   const wss = new WebSocket.Server({ server, path: '/ws' })
@@ -18,22 +19,22 @@ function initialize (server, app) {
         const command = JSON.parse(message)
         const { action } = command
         switch (action) {
-          case ACTION_START_CAST:
+          case ACTION_CAST_START:
             _startCast(command, ws, app)
             break
-          case ACTION_LIST_CASTS:
+          case ACTION_CAST_LIST:
             _listCasts(command, ws, app)
             break
-          case ACTION_LIST_DEVICES:
+          case ACTION_DEVICE_LIST:
             _listDevices(command, ws, app)
             break
-          case ACTION_LIST_FILES:
+          case ACTION_FILE_LIST:
             _listFiles(command, ws, app)
             break
-          case ACTION_ADD_STREAM:
+          case ACTION_STREAM_ADD:
             _addStream(command, ws, app)
             break
-          case ACTION_LIST_STREAMS:
+          case ACTION_STREAM_LIST:
             _listStreams(command, ws, app)
             break
           default:
@@ -43,10 +44,10 @@ function initialize (server, app) {
         ws.send(JSON.stringify({ error }))
       }
     })
-    _listDevices({ action: ACTION_LIST_DEVICES }, ws, app)
-    _listFiles({ action: ACTION_LIST_DEVICES }, ws, app)
-    _listStreams({ action: ACTION_LIST_DEVICES }, ws, app)
-    _listCasts({ action: ACTION_LIST_CASTS }, ws, app)
+    _listDevices({ action: ACTION_DEVICE_LIST }, ws, app)
+    _listFiles({ action: ACTION_DEVICE_LIST }, ws, app)
+    _listStreams({ action: ACTION_DEVICE_LIST }, ws, app)
+    _listCasts({ action: ACTION_CAST_LIST }, ws, app)
   })
 
   app.wss = wss
@@ -57,9 +58,15 @@ function _startCast (command, ws, _app) {
   const device = cast.devices[deviceId]
   cast.castMedia(device, url, (error) => {
     ws.send(JSON.stringify({
-      action: ACTION_START_CAST,
+      action: ACTION_CAST_START,
       error,
       value: `Playing ${url} on your ${device.friendlyName}`
+    }))
+  }, (status) => {
+    ws.send(JSON.stringify({
+      action: ACTION_CAST_STATUS,
+      error: false,
+      value: status
     }))
   })
 }
@@ -70,14 +77,14 @@ function _listDevices (command, ws, _app) {
     deviceId: cast.devices[deviceId].host
   }))
   ws.send(JSON.stringify({
-    action: ACTION_LIST_DEVICES,
+    action: ACTION_DEVICE_LIST,
     value: deviceList
   }))
 }
 
 function _listFiles (command, ws, app) {
   ws.send(JSON.stringify({
-    action: ACTION_LIST_FILES,
+    action: ACTION_FILE_LIST,
     values: files.listFiles(app._filesPath).map(i => `${process.env.PUBLIC_URL}/files/${i}`)
   }))
 }
@@ -90,7 +97,7 @@ function _addStream (command, ws, app) {
     error = 'There was an error adding the stream'
   }
   ws.send(JSON.stringify({
-    action: ACTION_ADD_STREAM,
+    action: ACTION_STREAM_ADD,
     error,
     value
   }))
@@ -98,14 +105,14 @@ function _addStream (command, ws, app) {
 
 function _listStreams (command, ws, app) {
   ws.send(JSON.stringify({
-    action: ACTION_LIST_STREAMS,
+    action: ACTION_STREAM_LIST,
     error: false,
     value: app._config.streams
   }))
 }
 function _listCasts (command, ws, app) {
   ws.send(JSON.stringify({
-    action: ACTION_LIST_CASTS,
+    action: ACTION_CAST_LIST,
     error: false,
     value: app._config.casts
   }))

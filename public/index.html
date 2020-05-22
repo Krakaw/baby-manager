@@ -15,7 +15,7 @@
 
     </div>
     <div class="row">
-        <div id="streams">        </div>
+        <div id="streams"></div>
     </div>
 </div>
 
@@ -43,6 +43,14 @@
         // cast('dream.mp3', 'e2b0f357-96f1-8572-8db6-bf96a7c17644.local')
     }
 
+    const ACTION_CAST_STATUS = 'castStatus'
+    const ACTION_CAST_START = 'castStart'
+    const ACTION_CAST_LIST = 'castList'
+    const ACTION_STREAM_ADD = 'streamAdd'
+    const ACTION_STREAM_LIST = 'streamList'
+    const ACTION_FILE_LIST = 'fileList'
+    const ACTION_DEVICE_LIST = 'deviceList'
+
     let casts = []
     let devices = []
     let files = []
@@ -51,12 +59,12 @@
     let players = [];
 
     function castFile(url, deviceId) {
-        const action = "startCast";
+        const action = ACTION_CAST_START
         socket.send(JSON.stringify({action, url, deviceId}))
     }
 
     function fetchDevices() {
-        socket.send(JSON.stringify({action: 'listDevices'}))
+        socket.send(JSON.stringify({action: ACTION_DEVICE_LIST}))
     }
 
     function renderStreams() {
@@ -68,12 +76,14 @@
         streamsDiv.innerHTML = ''
 
         streams.forEach(stream => {
-            let canvas = document.createElement('canvas')
+            const canvas = document.createElement('canvas')
             streamsDiv.append(canvas)
             const {streamWsPort} = stream
-            players.push(new JSMpeg.Player(`ws://${window.location.hostname}:${streamWsPort}`, {
-                    canvas: canvas // Canvas should be a canvas DOM element
-                }));
+            players.push(
+                new JSMpeg.Player(`ws://${window.location.hostname}:${streamWsPort}`, {
+                    canvas
+                })
+            );
         })
     }
 
@@ -82,8 +92,12 @@
         castsDiv.innerHTML = ''
         casts.forEach(cast => {
             const button = document.createElement('button')
-            button.onclick = castFile(cast.url, cast.deviceId)
-            button.innerText = `${cast.url} - ${cast.deviceId}`
+            button.onclick = function () {
+                castFile(cast.url, cast.deviceId)
+            }
+            let device = devices.find(d => d.host === cast.deviceId)
+            let name = device ? device.friendlyName : cast.deviceId;
+            button.innerText = `Play ${cast.url.split('/').pop()} on ${name}`
             castsDiv.append(button)
         })
     }
@@ -92,18 +106,19 @@
     const socket = new WebSocket(`ws://${window.location.hostname}:3000/ws`)
     socket.onmessage = (e) => {
         const data = JSON.parse(e.data);
+        console.log(data)
         switch (data.action) {
-            case 'listDevices':
+            case ACTION_DEVICE_LIST:
                 devices = data.value
                 break
-            case "listFiles":
+            case ACTION_FILE_LIST:
                 files = data.value
                 break
-            case 'listStreams':
+            case ACTION_STREAM_LIST:
                 streams = data.value
                 renderStreams()
                 break
-            case 'listCasts':
+            case ACTION_CAST_LIST:
                 casts = data.value
                 renderCasts()
                 break
