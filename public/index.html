@@ -11,13 +11,11 @@
 <body>
 <div class="container">
     <div class="row">
-
+        <div id="casts"></div>
 
     </div>
     <div class="row">
-        <div id="streams">
-
-        </div>
+        <div id="streams">        </div>
     </div>
 </div>
 
@@ -45,15 +43,16 @@
         // cast('dream.mp3', 'e2b0f357-96f1-8572-8db6-bf96a7c17644.local')
     }
 
+    let casts = []
     let devices = []
     let files = []
     let streams = []
 
     let players = [];
 
-    function cast(song, deviceId) {
+    function castFile(url, deviceId) {
         const action = "startCast";
-        socket.send(JSON.stringify({action, song, deviceId}))
+        socket.send(JSON.stringify({action, url, deviceId}))
     }
 
     function fetchDevices() {
@@ -77,9 +76,18 @@
                 }));
         })
     }
-    function reRender() {
-        renderStreams()
+
+    function renderCasts() {
+        let castsDiv = document.getElementById('casts');
+        castsDiv.innerHTML = ''
+        casts.forEach(cast => {
+            const button = document.createElement('button')
+            button.onclick = castFile(cast.url, cast.deviceId)
+            button.innerText = `${cast.url} - ${cast.deviceId}`
+            castsDiv.append(button)
+        })
     }
+
 
     const socket = new WebSocket(`ws://${window.location.hostname}:3000/ws`)
     socket.onmessage = (e) => {
@@ -93,10 +101,13 @@
                 break
             case 'listStreams':
                 streams = data.value
+                renderStreams()
+                break
+            case 'listCasts':
+                casts = data.value
+                renderCasts()
                 break
         }
-        reRender()
-        console.log(data)
     }
 
 </script>

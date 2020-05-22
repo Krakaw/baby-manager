@@ -7,6 +7,7 @@ const ACTION_ADD_STREAM = 'addStream'
 const ACTION_LIST_STREAMS = 'listStreams'
 const ACTION_LIST_FILES = 'listFiles'
 const ACTION_LIST_DEVICES = 'listDevices'
+const ACTION_LIST_CASTS = 'listCasts'
 
 function initialize (server, app) {
   const wss = new WebSocket.Server({ server, path: '/ws' })
@@ -19,6 +20,9 @@ function initialize (server, app) {
         switch (action) {
           case ACTION_START_CAST:
             _startCast(command, ws, app)
+            break
+          case ACTION_LIST_CASTS:
+            _listCasts(command, ws, app)
             break
           case ACTION_LIST_DEVICES:
             _listDevices(command, ws, app)
@@ -42,6 +46,7 @@ function initialize (server, app) {
     _listDevices({ action: ACTION_LIST_DEVICES }, ws, app)
     _listFiles({ action: ACTION_LIST_DEVICES }, ws, app)
     _listStreams({ action: ACTION_LIST_DEVICES }, ws, app)
+    _listCasts({ action: ACTION_LIST_CASTS }, ws, app)
   })
 
   app.wss = wss
@@ -96,6 +101,13 @@ function _listStreams (command, ws, app) {
     action: ACTION_LIST_STREAMS,
     error: false,
     value: app._config.streams
+  }))
+}
+function _listCasts (command, ws, app) {
+  ws.send(JSON.stringify({
+    action: ACTION_LIST_CASTS,
+    error: false,
+    value: app._config.casts
   }))
 }
 
