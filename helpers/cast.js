@@ -27,8 +27,7 @@ function castMedia (device, url, playCallback, statusCallback) {
   console.log(`Playing ${url} on your ${device.friendlyName}`)
   device._url = url
   device._statusCallback = statusCallback
-  device.client
-    .device.play(url, { repeatMode: 'ALL' }, playCallback)
+  device.play(url, playCallback)
 }
 
 module.exports = {
