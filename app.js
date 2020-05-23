@@ -8,18 +8,12 @@ const logger = require('morgan')
 
 const stream = require('./helpers/stream')
 const Config = require('./helpers/config')
-const sockets = require('./routes/sockets')
 
 const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
 const app = express()
 
-/**
- * TODO Create routes for the casting and reuse in REST and WS
- */
-
 app._config = new Config(process.env.CONFIG_FILE)
-app._wsInit = sockets.initialize
 app._filesPath = path.join(__dirname, 'public', 'files')
 
 stream.startStreams(app._config.streams)

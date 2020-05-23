@@ -7,17 +7,34 @@
     <title>Baby Monitor</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div id="casts"></div>
+<div id="app">
+    <div class="container">
+        <div class="row">
+            <pre>{{castStatusData}}</pre>
+            <pre>{{devices}}</pre>
+            <pre>{{files}}</pre>
 
-    </div>
-    <div class="row">
-        <div id="streams"></div>
+            <div>
+                <button type="button" class="btn btn-primary"
+                        @click="castUrl(cast)"
+                        v-for="(cast, i) in friendlyCastList">
+                    {{cast.friendlyFileName}}<br/><i class="fas fa-play"></i><br>{{cast.friendlyDeviceName}}
+                </button>
+            </div>
+
+        </div>
+        <div class="row">
+            <div v-for="(stream, i) in streams">
+                <render-stream :stream="stream"></render-stream>
+            </div>
+            <div id="streams"></div>
+        </div>
     </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
@@ -29,20 +46,11 @@
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script>
 <script type='text/javascript' src='javascripts/jsmpeg.min.js'></script>
+<!-- production version, optimized for size and speed -->
+<!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script>
-
-    function castSleep() {
-        // cast('white_noise.mp3', 'af3e623c-3215-c7ea-26b0-c2661ee9bad9.local')
-        //study
-        cast('white_noise.mp3', '6ae559b6-aa5e-7a15-108b-6b8379dc43f7.local')
-        // Office TV
-        // cast('white_noise.mp3', 'd66975bc-4a97-be29-9b9b-d71bfc19eceb.local')
-    }
-
-    function castBedtime() {
-        // cast('dream.mp3', 'e2b0f357-96f1-8572-8db6-bf96a7c17644.local')
-    }
-
     const ACTION_CAST_STATUS = 'castStatus'
     const ACTION_CAST_START = 'castStart'
     const ACTION_CAST_LIST = 'castList'
@@ -50,6 +58,89 @@
     const ACTION_STREAM_LIST = 'streamList'
     const ACTION_FILE_LIST = 'fileList'
     const ACTION_DEVICE_LIST = 'deviceList'
+
+    Vue.component('render-stream', {
+        props: ['stream'],
+        data: () => {
+            return {
+                player: null
+            }
+        },
+        template: '<canvas ref="canvas"></canvas>',
+        mounted() {
+            const {streamWsPort} = this.stream
+            this.$set(this, 'player', new JSMpeg.Player(`ws://${window.location.hostname}:${streamWsPort}`, {
+                canvas: this.$refs.canvas
+            }));
+        },
+        beforeDestroy() {
+            this.player.stop()
+        }
+    })
+    const app = new Vue({
+        el: '#app',
+        data: {
+            socket: false,
+            casts: [],
+            devices: [],
+            files: [],
+            streams: [],
+            players: [],
+            castStatusData: {}
+        },
+        computed: {
+            friendlyCastList() {
+                let devices = this.devices;
+                let deviceMap = {};
+                devices.forEach(device => {
+                    deviceMap[device.deviceId] = device.friendlyName;
+                })
+                let casts = this.casts;
+                return casts.map(cast => {
+                    cast.friendlyFileName = cast.url.split('/').pop()
+                    cast.friendlyDeviceName = deviceMap[cast.deviceId]
+                    return cast
+                })
+            },
+        },
+        methods: {
+            castUrl(cast) {
+                this.socket.send(JSON.stringify({
+                    action: ACTION_CAST_START,
+                    url: cast.url,
+                    deviceId: cast.deviceId
+                }))
+            },
+            onSocketMessage(e) {
+                const data = JSON.parse(e.data);
+                if (this[data.action]) {
+                    console.log(data.action, data)
+                    this[data.action](data);
+                }
+            },
+            [ACTION_DEVICE_LIST](data) {
+                this.$set(this, 'devices', data.value)
+            },
+            [ACTION_CAST_LIST](data) {
+                this.$set(this, 'casts', data.value)
+            },
+            [ACTION_CAST_STATUS](data) {
+                this.$set(this.castStatusData, data.value.deviceId, data.value.status)
+            },
+            [ACTION_FILE_LIST](data) {
+                this.$set(this, 'files', data.value)
+            },
+            [ACTION_STREAM_LIST](data) {
+                this.$set(this, 'streams', data.value)
+            },
+        },
+        created() {
+            const socket = new WebSocket(`ws://${window.location.host}/ws`);
+            socket.onmessage = this.onSocketMessage
+            this.$set(this, 'socket', socket)
+        }
+    })
+
 
     let casts = []
     let devices = []
@@ -67,25 +158,6 @@
         socket.send(JSON.stringify({action: ACTION_DEVICE_LIST}))
     }
 
-    function renderStreams() {
-        players.forEach(player => {
-            player.stop()
-        })
-        players = []
-        let streamsDiv = document.getElementById('streams');
-        streamsDiv.innerHTML = ''
-
-        streams.forEach(stream => {
-            const canvas = document.createElement('canvas')
-            streamsDiv.append(canvas)
-            const {streamWsPort} = stream
-            players.push(
-                new JSMpeg.Player(`ws://${window.location.hostname}:${streamWsPort}`, {
-                    canvas
-                })
-            );
-        })
-    }
 
     function renderCasts() {
         let castsDiv = document.getElementById('casts');
@@ -102,28 +174,6 @@
         })
     }
 
-
-    const socket = new WebSocket(`ws://${window.location.hostname}:3000/ws`)
-    socket.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        console.log(data)
-        switch (data.action) {
-            case ACTION_DEVICE_LIST:
-                devices = data.value
-                break
-            case ACTION_FILE_LIST:
-                files = data.value
-                break
-            case ACTION_STREAM_LIST:
-                streams = data.value
-                renderStreams()
-                break
-            case ACTION_CAST_LIST:
-                casts = data.value
-                renderCasts()
-                break
-        }
-    }
 
 </script>
 </body>
