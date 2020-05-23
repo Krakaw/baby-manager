@@ -1,20 +1,15 @@
 const WebSocket = require('ws')
-const cast = require('../helpers/cast')
+const Cast = require('../helpers/cast')
 const files = require('../helpers/files')
-
-const ACTION_CAST_STATUS = 'castStatus'
-const ACTION_CAST_START = 'castStart'
-const ACTION_CAST_LIST = 'castList'
-const ACTION_STREAM_ADD = 'streamAdd'
-const ACTION_STREAM_LIST = 'streamList'
-const ACTION_FILE_LIST = 'fileList'
-const ACTION_DEVICE_LIST = 'deviceList'
+const { ACTIONS } = require('../constants/sockets')
 
 class Sockets {
   constructor (server, app) {
     this.wss = new WebSocket.Server({ server, path: '/ws' })
     this.app = app
     this.app.wss = this.wss
+    this.cast = new Cast(this)
+
     this.onConnection()
   }
 
@@ -37,44 +32,21 @@ class Sockets {
 
   onClientConnected (ws) {
     const app = this.app
-    this.deviceList({ action: ACTION_DEVICE_LIST }, ws, app)
-    this.fileList({ action: ACTION_DEVICE_LIST }, ws, app)
-    this.streamList({ action: ACTION_DEVICE_LIST }, ws, app)
-    this.castList({ action: ACTION_CAST_LIST }, ws, app)
+    this.castDeviceList({ action: ACTIONS.ACTION_CAST_DEVICE_LIST }, ws, app)
+    this.fileList({ action: ACTIONS.ACTION_FILE_LIST }, ws, app)
+    this.streamList({ action: ACTIONS.ACTION_STREAM_LIST }, ws, app)
+    this.castList({ action: ACTIONS.ACTION_CAST_LIST }, ws, app)
   }
 
-  castStart (command, ws, _app) {
-    const { url, deviceId } = command
-    const device = cast.devices[deviceId]
-    cast.castMedia(device, url, (error) => {
-      ws.send(JSON.stringify({
-        action: ACTION_CAST_START,
-        error,
-        value: `Playing ${url} on your ${device.friendlyName}`
-      }))
-    }, (status) => {
-      ws.send(JSON.stringify({
-        action: ACTION_CAST_STATUS,
-        error: false,
-        value: { deviceId, status }
-      }))
+  broadcast (message) {
+    this.wss.clients.forEach(client => {
+      client.send(JSON.stringify(message))
     })
-  }
-
-  deviceList (command, ws, _app) {
-    const deviceList = Object.keys(cast.devices).map(deviceId => ({
-      friendlyName: cast.devices[deviceId].friendlyName,
-      deviceId: cast.devices[deviceId].host
-    }))
-    ws.send(JSON.stringify({
-      action: ACTION_DEVICE_LIST,
-      value: deviceList
-    }))
   }
 
   fileList (command, ws, app) {
     ws.send(JSON.stringify({
-      action: ACTION_FILE_LIST,
+      action: ACTIONS.ACTION_FILE_LIST,
       value: files.listFiles(app._filesPath).map(i => `${process.env.PUBLIC_URL}/files/${i}`)
     }))
   }
@@ -87,7 +59,7 @@ class Sockets {
       error = 'There was an error adding the stream'
     }
     ws.send(JSON.stringify({
-      action: ACTION_STREAM_ADD,
+      action: ACTIONS.ACTION_STREAM_ADD,
       error,
       value
     }))
@@ -95,15 +67,53 @@ class Sockets {
 
   streamList (command, ws, app) {
     ws.send(JSON.stringify({
-      action: ACTION_STREAM_LIST,
+      action: ACTIONS.ACTION_STREAM_LIST,
       error: false,
       value: app._config.streams
     }))
   }
 
-  castList (command, ws, app) {
+  castDeviceList (command, ws, _app) {
+    const devices = this.cast.devices
+    const deviceList = Object.keys(devices).map(deviceId => ({
+      friendlyName: devices[deviceId].friendlyName,
+      deviceId: devices[deviceId].host
+    }))
     ws.send(JSON.stringify({
-      action: ACTION_CAST_LIST,
+      action: ACTIONS.ACTION_CAST_DEVICE_LIST,
+      value: deviceList
+    }))
+  }
+
+  castStart (command, ws, _app) {
+    const { url, deviceId } = command
+    this.cast.castMedia(deviceId, url, (error, device) => {
+      ws.send(JSON.stringify({
+        action: ACTIONS.ACTION_CAST_START,
+        error,
+        value: `Playing ${url} on your ${device.friendlyName}`
+      }))
+    })
+  }
+
+  castStop (command, ws, _app) {
+    const { deviceId } = command
+    this.cast.castStop(deviceId, (error, device) => {
+      ws.send(JSON.stringify({
+        action: ACTIONS.ACTION_CAST_STOP,
+        error,
+        value: `Stopping ${device.friendlyName}`
+      }))
+    })
+  }
+
+  castList (command, ws, app) {
+    app._config.casts.forEach(c => {
+      this.cast.castStatus(c.deviceId, () => {})
+    })
+
+    ws.send(JSON.stringify({
+      action: ACTIONS.ACTION_CAST_LIST,
       error: false,
       value: app._config.casts
     }))
