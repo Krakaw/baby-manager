@@ -44,28 +44,41 @@ class Cast {
   }
 
   castStatus (deviceId, callback) {
-    const statusClient = new Client()
-    statusClient.connect(deviceId, () => {
-      const connection = statusClient.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.tp.connection', 'JSON')
-      const receiver = statusClient.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.receiver', 'JSON')
-      connection.send({ type: 'CONNECT' })
-      receiver.send({ type: 'GET_STATUS', requestId: 1 })
-      receiver.on('message', (data, broadcast) => {
-        if (data.type === 'RECEIVER_STATUS') {
-          if (callback) {
-            callback(deviceId, data.status)
-          }
-          this.broadcastStatus(deviceId, data.status)
-        }
+    try {
+      const statusClient = new Client()
+      statusClient.on('error', (e) => {
+        console.log('statusClient Error', e)
       })
-    })
+      statusClient.connect(deviceId, () => {
+        const connection = statusClient.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.tp.connection', 'JSON')
+        const receiver = statusClient.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.receiver', 'JSON')
+        connection.send({ type: 'CONNECT' })
+        connection.on('error', (e) => {
+          console.log(e)
+        })
+        receiver.on('error', (e) => {
+          console.log(e)
+        })
+        receiver.send({ type: 'GET_STATUS', requestId: 1 })
+        receiver.on('message', (data, broadcast) => {
+          if (data.type === 'RECEIVER_STATUS') {
+            if (callback) {
+              callback(deviceId, data.status)
+            }
+            this.broadcastStatus(deviceId, data.status)
+          }
+        })
+      })
+    } catch (e) {
+      console.error('Error in castStatus', e)
+    }
   }
 
   castMedia (deviceId, url, callback) {
     const device = this.devices[deviceId]
     console.log(`Playing ${url} on your ${device.friendlyName}`)
     device._url = url
-    device.play(url, (err) => {
+    device.play(url, { displayName: 'Test Device' }, (err) => {
       callback(err, device)
     })
   }

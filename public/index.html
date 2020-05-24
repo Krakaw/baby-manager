@@ -7,21 +7,43 @@
     <title>Baby Monitor</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+          integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 </head>
 <body>
 <div id="app">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <pre>{{castStatusData}}</pre>
-            <pre>{{devices}}</pre>
-            <pre>{{files}}</pre>
-
-            <div>
+            <div class="col-sm">
+                <select v-model="playDeviceId">
+                    <option selected value="">Select Device</option>
+                    <option v-for="(device, i) in devices" :value="device.deviceId">{{device.friendlyName}}</option>
+                </select>
+                <select v-model="playUrl">
+                    <option value="">Play File</option>
+                    <option v-for="file in files" :value="file">{{file.split('/').pop()}}</option>
+                </select>
+                <input type="text" v-model="playUrl"/>
+                <button type="button" class="btn btn-primary" @click="play(playDeviceId, playUrl)">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+            <div class="col-sm">
                 <button type="button" class="btn btn-primary"
                         @click="castUrl(cast)"
                         v-for="(cast, i) in friendlyCastList">
-                    {{cast.friendlyFileName}}<br/><i class="fas fa-play"></i><br>{{cast.friendlyDeviceName}}
+                    {{cast.friendlyFileName}}
+                    <div v-if="!deviceState[cast.deviceId] || deviceState[cast.deviceId] === 'LOADING'">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <i v-if="deviceState[cast.deviceId] === 'PLAYING'" class="fas fa-stop"></i>
+                        <i v-if="deviceState[cast.deviceId] === 'STOPPED'" class="fas fa-play"></i>
+                    </div>
+
+                    {{cast.friendlyDeviceName}}
                 </button>
             </div>
 
@@ -87,7 +109,9 @@
             files: [],
             streams: [],
             players: [],
-            castStatusData: {}
+            castStatusData: {},
+            playDeviceId: '',
+            playUrl: ''
         },
         computed: {
             friendlyCastList() {
@@ -103,14 +127,42 @@
                     return cast
                 })
             },
+            deviceState() {
+                const devicesPlaying = {}
+                const status = this.castStatusData;
+                const devices = this.devices
+                devices.forEach(device => {
+                    const {deviceId} = device
+                    devicesPlaying[deviceId] = (!status[deviceId] || status[deviceId]?.playerState === 'LOADING') ?
+                        'LOADING' : (status[deviceId]?.applications?.length > 0 ||
+                            status[deviceId]?.playerState === 'PLAYING') ? 'PLAYING' : 'STOPPED'
+
+                })
+                return devicesPlaying
+            }
         },
         methods: {
-            castUrl(cast) {
+            alert(e) {
+                console.log(e.$target.value)
+            },
+            play(deviceId, url) {
+                this.$set(this.castStatusData, deviceId, {playerState: 'LOADING'})
                 this.socket.send(JSON.stringify({
                     action: ACTION_CAST_START,
-                    url: cast.url,
-                    deviceId: cast.deviceId
+                    url,
+                    deviceId
                 }))
+            },
+            stop(deviceId) {
+                this.$set(this.castStatusData, deviceId, {playerState: 'LOADING'})
+                this.socket.send(JSON.stringify({
+                    action: ACTION_CAST_STOP,
+                    deviceId
+                }))
+            },
+            castUrl(cast) {
+                const {deviceId, url} = cast
+                this.deviceState[cast.deviceId] === 'STOPPED' ? this.play(deviceId, url) : this.stop(deviceId)
             },
             socketConnect() {
                 const socket = new WebSocket(`ws://${window.location.host}/ws`);
