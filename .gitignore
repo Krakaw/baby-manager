@@ -1,7 +1,9 @@
-public/files
-.data.json
-.env
-.idea
+server/public/files
+server/.data.json
+server/.env
+server/.idea
+client/.env
+client/.idea
 # Logs
 logs
 *.log
