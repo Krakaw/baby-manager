@@ -30,7 +30,7 @@
             </div>
             <div class="col-sm">
                 <button type="button" class="btn btn-primary"
-                        @click="castUrl(cast)"
+                        @click="play(cast.deviceId, cast.url)"
                         v-for="(cast, i) in friendlyCastList">
                     {{cast.friendlyFileName}}
                     <div v-if="!deviceState[cast.deviceId] || deviceState[cast.deviceId] === 'LOADING'">
@@ -200,45 +200,9 @@
             },
         },
         created() {
-
             this.socketConnect()
-
         }
     })
-
-
-    let casts = []
-    let devices = []
-    let files = []
-    let streams = []
-
-    let players = [];
-
-    function castFile(url, deviceId) {
-        const action = ACTION_CAST_START
-        socket.send(JSON.stringify({action, url, deviceId}))
-    }
-
-    function fetchDevices() {
-        socket.send(JSON.stringify({action: ACTION_CAST_DEVICE_LIST}))
-    }
-
-
-    function renderCasts() {
-        let castsDiv = document.getElementById('casts');
-        castsDiv.innerHTML = ''
-        casts.forEach(cast => {
-            const button = document.createElement('button')
-            button.onclick = function () {
-                castFile(cast.url, cast.deviceId)
-            }
-            let device = devices.find(d => d.host === cast.deviceId)
-            let name = device ? device.friendlyName : cast.deviceId;
-            button.innerText = `Play ${cast.url.split('/').pop()} on ${name}`
-            castsDiv.append(button)
-        })
-    }
-
 
 </script>
 </body>

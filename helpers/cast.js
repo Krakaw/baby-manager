@@ -19,7 +19,6 @@ class Cast {
     if (!this.devices[deviceId]) {
       this.devices[deviceId] = device
       // All devices must loop
-
       device.on('finished', (e) => {
         device.play(device._url, e => {
           console.log('Resuming', e)
