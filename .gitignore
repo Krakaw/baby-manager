@@ -1,4 +1,4 @@
-server/public/files
+server/public/files/
 server/.data.json
 server/.env
 server/.idea
