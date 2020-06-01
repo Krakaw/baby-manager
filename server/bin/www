@@ -21,7 +21,18 @@ app.set('port', port)
 
 const server = http.createServer(app)
 // eslint-disable-next-line no-unused-vars
-const _sockets = new Sockets(server, app)
+const sockets = new Sockets(server, app)
+
+process.on('uncaughtException', function (error) {
+  console.error('Caught exception: ' + error)
+  try {
+    sockets.broadcast({
+      error
+    })
+  } catch {
+
+  }
+})
 
 /**
  * Listen on provided port, on all network interfaces.
