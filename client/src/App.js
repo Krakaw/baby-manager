@@ -1,8 +1,10 @@
-import React from 'react';
+import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  const url = process.env.REACT_APP_SERVER_URL
+  console.log(url)
   return (
     <div className="App">
       <header className="App-header">
