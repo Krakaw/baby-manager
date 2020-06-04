@@ -7,6 +7,7 @@ class Cast {
     this.devices = {}
     this.client = new ChromecastAPI()
     this.sockets = sockets
+    this.debounceResume = {}
     this.initOnDevice()
   }
 
@@ -20,9 +21,14 @@ class Cast {
       this.devices[deviceId] = device
       // All devices must loop
       device.on('finished', (e) => {
-        device.play(device._url, e => {
-          console.log('Resuming', e)
-        })
+        if (this.debounceResume[deviceId] < (new Date()).getTime() - 60000) {
+          device.play(device._url, e => {
+            this.debounceResume[deviceId] = (new Date()).getTime()
+            console.log('Resuming', e)
+          })
+        } else {
+          console.log('Play happened too recently')
+        }
       })
       device.on('status', (status) => {
         this.broadcastStatus(deviceId, status)
