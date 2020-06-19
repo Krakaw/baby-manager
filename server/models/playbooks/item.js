@@ -1,20 +1,38 @@
+const stream = require('../../helpers/stream')
 class Item {
-  constructor (opts = {}) {
-    const defaults = Item.createMedia()
-    this.options = {
-      ...defaults,
-      ...opts
+  constructor (type, name = '', params = {}) {
+    this.status = null
+    this.type = type
+    this.name = name
+    this.params = params
+  }
+
+  run () {
+    switch (this.type) {
+      case Item.TYPES.TYPE_RTSP_STREAM:
+        stream.startStream(this.params.url, this.params.port)
+        this.status = Item.STATUS.RTSP_STREAMING
+        break
+    }
+  }
+
+  toJson () {
+    return {
+      type: this.type,
+      name: this.name,
+      params: this.params
     }
   }
 }
 
-Item.createMedia = (url = '', repeat = Item.REPEAT.REPEAT_NONE) => {
+Item.createMedia = (url = '', repeat = Item.REPEAT.REPEAT_NONE, destination = '') => {
   return {
     name: '',
     type: Item.TYPES.TYPE_MEDIA,
     params: {
       url,
-      repeat
+      repeat,
+      destination
     }
   }
 }
@@ -50,6 +68,10 @@ Item.REPEAT = {
 Item.SWITCH = {
   SWITCH_OFF: 'SWITCH_OFF',
   SWITCH_ON: 'SWITCH_ON'
+}
+Item.STATUS = {
+  RTSP_STREAMING: 'RTSP_STREAMING',
+  RTSP_STOPPED: 'RTSP_STOPPED'
 }
 
 module.exports = Item

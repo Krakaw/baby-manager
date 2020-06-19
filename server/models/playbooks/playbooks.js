@@ -8,6 +8,14 @@ class Playbooks {
     this.playbooks = this.loadConfig().map(playbook => new Playbook(playbook.name, playbook.items))
   }
 
+  addPlaybook (playbook) {
+    if (this.playbooks.find(p => p.name === playbook.name)) {
+      throw Error('Playbook by that name already exists')
+    }
+    this.playbooks.push(playbook.toJson())
+    this.saveConfig(this.playbooks)
+  }
+
   loadConfig () {
     let contents = ''
 
@@ -16,10 +24,7 @@ class Playbooks {
     } else {
       contents = this.saveConfig(DEFAULT_CONFIG)
     }
-    return {
-      ...DEFAULT_CONFIG,
-      ...JSON.parse(contents)
-    }
+    return JSON.parse(contents)
   }
 
   saveConfig (config) {

@@ -14,6 +14,12 @@ function startStream (streamUrl, streamWsPort) {
       '-nostats': ''
     }
   })
+  stream.on('exitWithError', (e) => {
+    console.error('ERROR DETECTED!!!!!!', e)
+    stream.stop()
+    stream.startMpeg1Stream()
+    stream.pipeStreamToSocketServer()
+  })
   return stream
 }
 
