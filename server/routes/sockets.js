@@ -69,7 +69,7 @@ class Sockets {
     ws.send(JSON.stringify({
       action: ACTIONS.ACTION_STREAM_LIST,
       error: false,
-      value: app._config.streams
+      value: app._playbooks.streams
     }))
   }
 

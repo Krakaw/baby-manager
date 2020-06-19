@@ -1,6 +1,6 @@
 const fs = require('fs')
 const Playbook = require('./playbook')
-
+const Item = require('./item')
 const DEFAULT_CONFIG = []
 class Playbooks {
   constructor (configFile) {
@@ -14,6 +14,14 @@ class Playbooks {
     }
     this.playbooks.push(playbook.toJson())
     this.saveConfig(this.playbooks)
+  }
+
+  get streams () {
+    let streams = []
+    this.playbooks.forEach(playbook => {
+      streams = streams.concat(playbook.items.filter(item => item.type === Item.TYPES.TYPE_RTSP_STREAM))
+    })
+    return streams
   }
 
   loadConfig () {

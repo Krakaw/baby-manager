@@ -9,6 +9,7 @@
     "lint:fix": "eslint --fix \"./**/*.js\""
   },
   "dependencies": {
+    "castv2": "^0.1.10",
     "chrome-launcher": "^0.13.2",
     "chrome-remote-interface": "^0.28.2",
     "chromecast-api": "^0.3.3",

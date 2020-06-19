@@ -92,8 +92,8 @@
         },
         template: '<canvas ref="canvas"></canvas>',
         mounted() {
-            const {streamWsPort} = this.stream
-            this.$set(this, 'player', new JSMpeg.Player(`ws://${window.location.hostname}:${streamWsPort}`, {
+            const {params:{port}} = this.stream
+            this.$set(this, 'player', new JSMpeg.Player(`ws://${window.location.hostname}:${port}`, {
                 canvas: this.$refs.canvas
             }));
         },
