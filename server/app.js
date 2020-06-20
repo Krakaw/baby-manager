@@ -5,15 +5,16 @@ const path = require('path')
 
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
+const Config = require('./helpers/config')
+const config = new Config(process.env.CONFIG_FILE)
 
-const Playbooks = require('./models/playbooks')
+const Playbooks = require('./models/playbooks')(config)
 
 const indexRouter = require('./routes/index')
 const app = express()
 
 app._filesPath = path.join(__dirname, 'public', 'files')
 app._playbooks = Playbooks
-// stream.startStreams(app._config.streams)
 
 app.use(logger('dev'))
 app.use(express.json())

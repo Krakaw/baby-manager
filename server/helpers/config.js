@@ -5,6 +5,9 @@ const DEFAULT_CONFIG = {
   ],
   streams: [
     // {streamUrl, streamWsPort}
+  ],
+  playbooks: [
+
   ]
 }
 class Config {
@@ -19,6 +22,15 @@ class Config {
 
   set casts (casts) {
     this._data.casts = casts
+    this.saveConfig(this._data)
+  }
+
+  get playbooks () {
+    return this._data.playbooks
+  }
+
+  set playbooks (playbooks) {
+    this._data.playbooks = playbooks
     this.saveConfig(this._data)
   }
 

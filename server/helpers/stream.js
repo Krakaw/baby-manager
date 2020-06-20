@@ -20,6 +20,9 @@ function startStream (streamUrl, streamWsPort) {
     stream.startMpeg1Stream()
     stream.pipeStreamToSocketServer()
   })
+  // stream.wsServer.on('connection', (e) => {
+  //   console.log(e)
+  // })
   return stream
 }
 
