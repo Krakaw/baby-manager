@@ -15,10 +15,11 @@ function startStream (streamUrl, streamWsPort) {
     }
   })
   stream.on('exitWithError', (e) => {
-    console.error('ERROR DETECTED!!!!!!', e)
+    console.error('Debounce me ERROR DETECTED!!!!!!', e)
     stream.stop()
     stream.startMpeg1Stream()
     stream.pipeStreamToSocketServer()
+    // Need to debounce this
   })
   // stream.wsServer.on('connection', (e) => {
   //   console.log(e)

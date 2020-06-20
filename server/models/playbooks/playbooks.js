@@ -1,8 +1,6 @@
-const fs = require('fs')
 const Playbook = require('./playbook')
 const Item = require('./item')
 
-const DEFAULT_CONFIG = []
 class Playbooks {
   constructor (config) {
     this.config = config

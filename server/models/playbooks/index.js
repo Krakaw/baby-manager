@@ -1,5 +1,6 @@
 const Playbooks = require('./playbooks')
-
+const Playbook = require('./playbook')
+const Item = require('./item')
 module.exports = (config) => {
   const playbooks = new Playbooks(config)
   if (process.env.AUTO_START_STREAMS) {
@@ -7,5 +8,10 @@ module.exports = (config) => {
       item.run()
     })
   }
-  return playbooks
+  return {
+    playbooks,
+    Playbooks,
+    Playbook,
+    Item
+  }
 }

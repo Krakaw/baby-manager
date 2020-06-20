@@ -7,8 +7,9 @@ const DEFAULT_CONFIG = {
     // {streamUrl, streamWsPort}
   ],
   playbooks: [
-
-  ]
+    // Playbook
+  ],
+  devices: []
 }
 class Config {
   constructor (path) {
@@ -27,6 +28,15 @@ class Config {
 
   get playbooks () {
     return this._data.playbooks
+  }
+
+  set devices (devices) {
+    this._data.devices = devices
+    this.saveConfig(this._data)
+  }
+
+  get devices () {
+    return this._data.devices
   }
 
   set playbooks (playbooks) {
@@ -77,7 +87,7 @@ class Config {
   }
 
   saveConfig (config) {
-    const data = JSON.stringify(config)
+    const data = JSON.stringify(config, null, 2)
     fs.writeFileSync(this._path, data)
     return data
   }
