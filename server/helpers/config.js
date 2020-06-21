@@ -13,6 +13,7 @@ const DEFAULT_CONFIG = {
 }
 class Config {
   constructor (path) {
+    this.saveDebounce = null
     this._path = path
     this._data = this.loadConfig()
   }
@@ -87,8 +88,11 @@ class Config {
   }
 
   saveConfig (config) {
+    clearTimeout(this.saveDebounce)
     const data = JSON.stringify(config, null, 2)
-    fs.writeFileSync(this._path, data)
+    this.saveDebounce = setTimeout(() => {
+      fs.writeFileSync(this._path, data)
+    }, 1000)
     return data
   }
 }

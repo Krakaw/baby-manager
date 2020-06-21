@@ -1,9 +1,23 @@
+const Chromecast = require('./chromecast')
 class Device {
   constructor (type, name, params, status) {
     this.type = type
     this.name = name
     this.params = params
     this.status = status || Device.STATUS.UNKNOWN
+    switch (this.type) {
+      case Device.TYPES.DEVICE_TYPE_CHROMECAST:
+        this.runner = new Chromecast(this)
+        break
+    }
+  }
+
+  toJson () {
+    return {
+      type: this.type,
+      name: this.name,
+      params: this.params
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-const Client = require('castv2').Client
+
 const mdns = require('mdns')
 const Device = require('./device')
 class Devices {
@@ -16,7 +16,7 @@ class Devices {
 
   addDevice (device) {
     this.devices.splice(this.devices.indexOf(this.getDevice(device.name)), 1, device)
-    this.config.devices = this.devices
+    this.config.devices = this.devices.map(device => device.toJson())
   }
 
   scanChromecasts () {
