@@ -2,9 +2,9 @@ const Playbook = require('./playbook')
 const Item = require('./item')
 
 class Playbooks {
-  constructor (config) {
+  constructor (config, devices) {
     this.config = config
-    this.playbooks = this.config.playbooks.map(playbook => new Playbook(playbook.name, playbook.items))
+    this.playbooks = this.config.playbooks.map(playbook => new Playbook(playbook.name, playbook.items, devices))
   }
 
   addPlaybook (playbook) {

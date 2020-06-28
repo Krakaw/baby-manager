@@ -31,18 +31,18 @@ class Config {
     return this._data.playbooks
   }
 
-  set devices (devices) {
-    this._data.devices = devices
-    this.saveConfig(this._data)
-  }
-
   get devices () {
     return this._data.devices
   }
 
+  set devices (devices) {
+    this._data.devices = devices
+    this.saveConfig()
+  }
+
   set playbooks (playbooks) {
     this._data.playbooks = playbooks
-    this.saveConfig(this._data)
+    this.saveConfig()
   }
 
   addCast (cast) {
@@ -79,7 +79,8 @@ class Config {
     if (fs.existsSync(this._path)) {
       contents = fs.readFileSync(this._path)
     } else {
-      contents = this.saveConfig(DEFAULT_CONFIG)
+      contents = JSON.stringify(DEFAULT_CONFIG)
+      this.saveConfig(DEFAULT_CONFIG)
     }
     return {
       ...DEFAULT_CONFIG,
@@ -89,11 +90,11 @@ class Config {
 
   saveConfig (config) {
     clearTimeout(this.saveDebounce)
-    const data = JSON.stringify(config, null, 2)
     this.saveDebounce = setTimeout(() => {
+      config = config || this._data
+      const data = JSON.stringify(config, null, 2)
       fs.writeFileSync(this._path, data)
     }, 1000)
-    return data
   }
 }
 

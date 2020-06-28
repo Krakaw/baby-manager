@@ -1,4 +1,3 @@
-
 const mdns = require('mdns')
 const Device = require('./device')
 class Devices {
@@ -15,7 +14,12 @@ class Devices {
   }
 
   addDevice (device) {
-    this.devices.splice(this.devices.indexOf(this.getDevice(device.name)), 1, device)
+    const currentDeviceIndex = this.devices.indexOf(this.getDevice(device.name))
+    if (currentDeviceIndex === -1) {
+      this.devices.push(device)
+    } else {
+      this.devices.splice(currentDeviceIndex, 1, device)
+    }
     this.config.devices = this.devices.map(device => device.toJson())
   }
 

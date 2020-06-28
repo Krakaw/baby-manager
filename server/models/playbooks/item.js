@@ -1,18 +1,25 @@
 const stream = require('../../helpers/stream')
 class Item {
-  constructor (type, name = '', params = {}) {
+  constructor (type, name = '', params = {}, devices) {
+    this.devices = devices
     this.status = null
     this.type = type
     this.name = name
     this.params = params
   }
 
-  run () {
+  run (next) {
     switch (this.type) {
       case Item.TYPES.TYPE_RTSP_STREAM:
         stream.startStream(this.params.url, this.params.port)
         this.status = Item.STATUS.RTSP_STREAMING
         break
+      case Item.TYPES.TYPE_MEDIA: {
+        const chromecastDevice = this.devices.getDevice(this.params.destination)
+        console.log('casting', this.params)
+        chromecastDevice.runner.launch(this.params, next)
+        break
+      }
     }
   }
 
@@ -25,7 +32,7 @@ class Item {
   }
 }
 
-Item.createMedia = (url = '', repeat = Item.REPEAT.REPEAT_NONE, destination = '') => {
+Item.createMedia = (url = '', repeat = Item.REPEAT.REPEAT_OFF, destination = '') => {
   return {
     name: '',
     type: Item.TYPES.TYPE_MEDIA,
@@ -62,7 +69,7 @@ Item.TYPES = {
   TYPE_RTSP_STREAM: 'TYPE_RTSP_STREAM'
 }
 Item.REPEAT = {
-  REPEAT_NONE: 'REPEAT_NONE',
+  REPEAT_OFF: 'REPEAT_OFF',
   REPEAT_SINGLE: 'REPEAT_SINGLE'
 }
 Item.SWITCH = {

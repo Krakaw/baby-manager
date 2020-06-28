@@ -8,8 +8,8 @@ const logger = require('morgan')
 const Config = require('./helpers/config')
 const config = new Config(process.env.CONFIG_FILE)
 
-const { playbooks } = require('./models/playbooks')(config)
 const { devices } = require('./models/devices')(config)
+const { playbooks } = require('./models/playbooks')(config, devices)
 
 const indexRouter = require('./routes/index')
 const app = express()

@@ -1,18 +1,18 @@
-const ChromecastAPI = require('chromecast-api')
-const Client = require('castv2').Client
+// const ChromecastAPI = require('chromecast-api')
+// const Client = require('castv2').Client
 const { ACTIONS } = require('../constants/sockets')
 
 class Cast {
   constructor (sockets) {
     this.devices = {}
-    this.client = new ChromecastAPI()
+    // this.client = new ChromecastAPI()
     this.sockets = sockets
     this.debounceResume = {}
     this.initOnDevice()
   }
 
   initOnDevice () {
-    this.client.on('device', this._addDevice.bind(this))
+    // this.client.on('device', this._addDevice.bind(this))
   }
 
   _addDevice (device) {

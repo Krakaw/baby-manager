@@ -30,7 +30,7 @@ Device.fromChromecast = (chromecast) => {
     model: chromecast.txtRecord.md,
     lastCast: chromecast.txtRecord.rs
   }
-  return new Device(Device.TYPES.DEVICE_TYPE_CHROMECAST, chromecast.host, params, Device.STATUS.READY)
+  return new Device(Device.TYPES.DEVICE_TYPE_CHROMECAST, chromecast.name, params, Device.STATUS.READY)
 }
 Device.TYPES = {
   DEVICE_TYPE_CHROMECAST: 'DEVICE_TYPE_CHROMECAST'

@@ -1,63 +1,68 @@
 const Client = require('castv2-client').Client
 const DefaultMediaReceiver = require('castv2-client').DefaultMediaReceiver
+var util = require('util')
+
 class Chromecast {
   constructor (device) {
     this.device = device
     this.client = null
     this.receiver = null
     this.requestId = 1
-    this.connect()
   }
 
-  launch (data) {
-    console.log('Receiver', this.receiver)
-    this.receiver.send({
-      ...{
-        type: 'LAUNCH',
-        appId: 'CC1AD845',
-        requestId: this.requestId++
-      },
-      ...data
-    })
-  }
-
-  connect () {
-    const { host } = this.device.params
+  launch (data, next) {
     const client = new Client()
-    client.connect(host, () => {
-      // create various namespace handlers
-      const connection = client.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.tp.connection', 'JSON')
-      const heartbeat = client.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.tp.heartbeat', 'JSON')
-      const receiver = client.createChannel('sender-0', 'receiver-0', 'urn:x-cast:com.google.cast.receiver', 'JSON')
+    const { host, port } = this.device.params
+    client.connect({ host, port }, () => {
+      console.log('Connected to ', this.device.params.friendlyName)
+      client.launch(DefaultMediaReceiver, (err, player) => {
+        if (err) {
+          console.error('client.launch error', err)
+        }
+        const media = [{
+          autoplay: true,
+          preloadTime: 3,
+          startTime: 1,
+          activeTrackIds: [],
+          repeatMode: data.repeat,
+          media: {
+            contentId: data.url,
+            contentType: data.contentType || 'audio/mpeg',
+            streamType: 'BUFFERED',
+            metadata: {
+              type: 0,
+              metadataType: 0,
+              title: data.title || data.url.split('/').pop(),
+              images: data.images || []
+            }
+          }
 
-      // establish virtual connection to the receiver
-      connection.send({ type: 'CONNECT' })
+        }]
+        player.on('status', (status) => {
+          if (data.repeat !== 'REPEAT_SINGLE' && status.idleReason === 'FINISHED' && status.loadingItemId === undefined) {
+            console.log('Item completed')
+            next()
+          }
+          console.log('Player status', status)
+        })
+        console.log('app "%s" launched, loading media %s ...', player.session.displayName, media.contentId)
 
-      // start heartbeating
-      setInterval(function () {
-        heartbeat.send({ type: 'PING' })
-      }, 5000)
-
-      // launch YouTube app
-      // receiver.send({ type: 'LAUNCH', appId: 'YouTube', requestId: 1 })
-      // receiver.send({
-      //   type: 'LAUNCH',
-      //   appId: 'CC1AD845',
-      //   requestId: this.requestId++,
-      //   data: 'http://192.168.0.101:3000/files/dream.mp3'
-      // })
-      // display receiver status updates
-      receiver.on('message', function (data, broadcast) {
-        if (data.type === 'RECEIVER_STATUS') {
-          console.log(data.status)
+        player.queueLoad(media, { startIndex: 0, repeatMode: data.repeat || 'REPEAT_OFF' }, (err, status) => {
+          if (err) {
+            console.error('player.load error', err)
+            return
+          }
+          console.log('status broadcast = %s', util.inspect(status), ' ')
+        })
+        if (data.repeat === 'REPEAT_SINGLE') {
+          next()
         }
       })
-      receiver.on('error', function (e) {
-        console.error('Chromecast Client error', e)
-      })
-      this.receiver = receiver
     })
-    this.client = client
+    client.on('error', (err) => {
+      console.error('Chromecast client error', err)
+      client.close()
+    })
   }
 }
 
