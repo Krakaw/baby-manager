@@ -6,9 +6,11 @@ class Item {
     this.type = type
     this.name = name
     this.params = params
+    this.stopper = null
   }
 
   run (next) {
+    console.log('Running type', this.type)
     switch (this.type) {
       case Item.TYPES.TYPE_RTSP_STREAM:
         stream.startStream(this.params.url, this.params.port)
@@ -17,9 +19,21 @@ class Item {
       case Item.TYPES.TYPE_MEDIA: {
         const chromecastDevice = this.devices.getDevice(this.params.destination)
         console.log('casting', this.params)
-        chromecastDevice.runner.launch(this.params, next)
+        this.stopper = chromecastDevice.runner.launch(this.params, next)
         break
       }
+      case Item.TYPES.TYPE_DELAY: {
+        setTimeout(() => {
+          next()
+        }, this.params.timeout)
+        break
+      }
+    }
+  }
+
+  stop () {
+    if (typeof this.stopper === 'function') {
+      this.stopper.stop()
     }
   }
 
@@ -63,10 +77,21 @@ Item.createStream = (url = '', port = 9998) => {
     }
   }
 }
+
+Item.createDelay = (timeout) => {
+  return {
+    name: '',
+    type: Item.TYPES.TYPE_DELAY,
+    params: {
+      timeout
+    }
+  }
+}
 Item.TYPES = {
   TYPE_MEDIA: 'TYPE_MEDIA',
   TYPE_SWITCH: 'TYPE_SWITCH',
-  TYPE_RTSP_STREAM: 'TYPE_RTSP_STREAM'
+  TYPE_RTSP_STREAM: 'TYPE_RTSP_STREAM',
+  TYPE_DELAY: 'TYPE_DELAY'
 }
 Item.REPEAT = {
   REPEAT_OFF: 'REPEAT_OFF',

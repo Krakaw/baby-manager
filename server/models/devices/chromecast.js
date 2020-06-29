@@ -13,11 +13,18 @@ class Chromecast {
   launch (data, next) {
     const client = new Client()
     const { host, port } = this.device.params
+    const result = {
+      stop: () => { console.error('Player has not been loaded yet'); return false }
+    }
     client.connect({ host, port }, () => {
       console.log('Connected to ', this.device.params.friendlyName)
       client.launch(DefaultMediaReceiver, (err, player) => {
         if (err) {
           console.error('client.launch error', err)
+        }
+        result.stop = () => {
+          player.stop()
+          return true
         }
         const media = [{
           autoplay: true,
@@ -63,6 +70,7 @@ class Chromecast {
       console.error('Chromecast client error', err)
       client.close()
     })
+    return result
   }
 }
 

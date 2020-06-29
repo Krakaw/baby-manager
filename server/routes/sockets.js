@@ -51,6 +51,10 @@ class Sockets {
     }))
   }
 
+  playbookStart (command, ws, app) {
+    console.log(command)
+  }
+
   streamAdd (command, ws, app) {
     const config = app._config
     let error
