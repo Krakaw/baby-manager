@@ -10,6 +10,7 @@ class Playbook {
   }
 
   start () {
+    this.stopped = false
     this.queue = [].concat(this.items)
     this.next()
   }
