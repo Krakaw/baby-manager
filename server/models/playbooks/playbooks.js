@@ -7,6 +7,10 @@ class Playbooks {
     this.playbooks = this.config.playbooks.map(playbook => new Playbook(playbook.name, playbook.items, devices))
   }
 
+  find (name) {
+    return this.playbooks.find(p => p.name === name)
+  }
+
   addPlaybook (playbook) {
     if (this.playbooks.find(p => p.name === playbook.name)) {
       throw Error('Playbook by that name already exists')

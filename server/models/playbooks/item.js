@@ -6,7 +6,9 @@ class Item {
     this.type = type
     this.name = name
     this.params = params
-    this.stopper = null
+    this.stopper = () => {
+      console.log('No stopper loaded for %s', this.name)
+    }
   }
 
   run (next) {
@@ -16,12 +18,14 @@ class Item {
         stream.startStream(this.params.url, this.params.port)
         this.status = Item.STATUS.RTSP_STREAMING
         break
-      case Item.TYPES.TYPE_MEDIA: {
-        const chromecastDevice = this.devices.getDevice(this.params.destination)
-        console.log('casting', this.params)
-        this.stopper = chromecastDevice.runner.launch(this.params, next)
+      case Item.TYPES.TYPE_MEDIA:
+        var chromecastDevice = this.devices.getDevice(this.params.destination)
+        chromecastDevice.runner.launch(this.params, next, (stop) => {
+          console.log('Add stopper', stop, this.stopper)
+          this.stopper = stop
+        })
         break
-      }
+
       case Item.TYPES.TYPE_DELAY: {
         setTimeout(() => {
           next()
@@ -32,9 +36,8 @@ class Item {
   }
 
   stop () {
-    if (typeof this.stopper === 'function') {
-      this.stopper.stop()
-    }
+    console.log('stopper types', this.stopper)
+    this.stopper()
   }
 
   toJson () {

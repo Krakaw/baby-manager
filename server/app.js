@@ -11,7 +11,6 @@ const config = new Config(process.env.CONFIG_FILE)
 const { devices } = require('./models/devices')(config)
 const { playbooks } = require('./models/playbooks')(config, devices)
 
-const indexRouter = require('./routes/index')
 const app = express()
 
 app._config = config
@@ -25,7 +24,10 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+const indexRouter = require('./routes/index')
+const playbooksRouter = require('./routes/playbooks')(playbooks)
 app.use('/', indexRouter)
+app.use('/playbooks', playbooksRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

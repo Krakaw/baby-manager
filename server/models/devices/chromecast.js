@@ -10,7 +10,7 @@ class Chromecast {
     this.requestId = 1
   }
 
-  launch (data, next) {
+  launch (data, next, addStopper) {
     const client = new Client()
     const { host, port } = this.device.params
     const result = {
@@ -22,10 +22,7 @@ class Chromecast {
         if (err) {
           console.error('client.launch error', err)
         }
-        result.stop = () => {
-          player.stop()
-          return true
-        }
+
         const media = [{
           autoplay: true,
           preloadTime: 3,
@@ -45,21 +42,30 @@ class Chromecast {
           }
 
         }]
+        addStopper(() => {
+          console.log('Stopping player!', player.session.displayName, media[0].media.contentId)
+          try {
+            player.stop()
+          } catch (e) {
+            console.log('stopper error', e)
+          }
+          return true
+        })
+
         player.on('status', (status) => {
           if (data.repeat !== 'REPEAT_SINGLE' && status.idleReason === 'FINISHED' && status.loadingItemId === undefined) {
             console.log('Item completed')
             next()
           }
-          console.log('Player status', status)
+          // console.log('Player status', status)
         })
-        console.log('app "%s" launched, loading media %s ...', player.session.displayName, media.contentId)
+        console.log('app "%s" launched, loading media %s ...', player.session.displayName, media[0].media.contentId)
 
         player.queueLoad(media, { startIndex: 0, repeatMode: data.repeat || 'REPEAT_OFF' }, (err, status) => {
           if (err) {
             console.error('player.load error', err)
-            return
           }
-          console.log('status broadcast = %s', util.inspect(status), ' ')
+          // console.log('status broadcast = %s', util.inspect(status), ' ')
         })
         if (data.repeat === 'REPEAT_SINGLE') {
           next()

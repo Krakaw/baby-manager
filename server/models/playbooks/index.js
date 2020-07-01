@@ -5,7 +5,7 @@ module.exports = (config, devices) => {
   const playbooks = new Playbooks(config, devices)
   if (process.env.AUTO_START_STREAMS) {
     playbooks.streams.forEach(item => {
-      item.run()
+      item.run().bind(item)
     })
   }
   return {
