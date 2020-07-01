@@ -9,6 +9,10 @@ class Playbook {
     this.current = null
   }
 
+  runningItems () {
+    return this.items.filter(i => i.running)
+  }
+
   start () {
     this.stopped = false
     this.queue = [].concat(this.items)
@@ -17,10 +21,8 @@ class Playbook {
 
   stop () {
     this.stopped = true
-    if (this.current) {
-      this.current.stop()
-    }
-    this.queue.forEach(item => {
+
+    this.items.forEach(item => {
       item.stop()
     })
   }

@@ -1,6 +1,5 @@
 const Client = require('castv2-client').Client
 const DefaultMediaReceiver = require('castv2-client').DefaultMediaReceiver
-var util = require('util')
 
 class Chromecast {
   constructor (device) {
@@ -10,7 +9,8 @@ class Chromecast {
     this.requestId = 1
   }
 
-  launch (data, next, addStopper) {
+  launch (item, next, addStopper) {
+    const data = item.params
     const client = new Client()
     const { host, port } = this.device.params
     const result = {
@@ -55,6 +55,7 @@ class Chromecast {
         player.on('status', (status) => {
           if (data.repeat !== 'REPEAT_SINGLE' && status.idleReason === 'FINISHED' && status.loadingItemId === undefined) {
             console.log('Item completed')
+            item.running = false
             next()
           }
           // console.log('Player status', status)

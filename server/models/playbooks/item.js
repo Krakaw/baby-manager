@@ -6,6 +6,7 @@ class Item {
     this.type = type
     this.name = name
     this.params = params
+    this.running = false
     this.stopper = () => {
       console.log('No stopper loaded for %s', this.name)
     }
@@ -13,6 +14,7 @@ class Item {
 
   run (next) {
     console.log('Running type', this.type)
+    this.running = true
     switch (this.type) {
       case Item.TYPES.TYPE_RTSP_STREAM:
         stream.startStream(this.params.url, this.params.port)
@@ -20,7 +22,7 @@ class Item {
         break
       case Item.TYPES.TYPE_MEDIA:
         var chromecastDevice = this.devices.getDevice(this.params.destination)
-        chromecastDevice.runner.launch(this.params, next, (stop) => {
+        chromecastDevice.runner.launch(this, next, (stop) => {
           console.log('Add stopper', stop, this.stopper)
           this.stopper = stop
         })
@@ -37,6 +39,7 @@ class Item {
 
   stop () {
     console.log('stopper types', this.stopper)
+    this.running = false
     this.stopper()
   }
 

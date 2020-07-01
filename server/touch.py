@@ -18,9 +18,9 @@ for pad in ['Back','A','B','C','D','Enter']:
 
 @touchphat.on_touch(['Back','A', 'B','C','D','Enter'])
 def handle_touch(event):
-    if (event.name == 'A'):
+    if event.name == 'A':
         requests.post('http://localhost:3000/playbooks/start', json={'name': 'Bedtime'})
-    if (event.name == 'B'):
+    if event.name == 'B':
         requests.post('http://localhost:3000/playbooks/stop', json={'name': 'Bedtime'})
     print(event.name)
 

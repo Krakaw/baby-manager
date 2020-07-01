@@ -1,4 +1,4 @@
-const mdns = require('mdns')
+const mdns = require('mdns-js')
 const Device = require('./device')
 class Devices {
   constructor (config) {
@@ -25,12 +25,17 @@ class Devices {
 
   scanChromecasts () {
     this.browser = mdns.createBrowser(mdns.tcp('googlecast'))
-    this.browser.on('serviceUp', (service) => {
-      const device = Device.fromChromecast(service)
-      this.addDevice(device)
+
+    this.browser.on('ready', () => {
+      this.browser.discover()
     })
 
-    this.browser.start()
+    this.browser.on('update', (data) => {
+      const device = Device.fromChromecast(data)
+      if (device) {
+        this.addDevice(device)
+      }
+    })
   }
 }
 

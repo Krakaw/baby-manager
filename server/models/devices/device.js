@@ -22,15 +22,26 @@ class Device {
 }
 
 Device.fromChromecast = (chromecast) => {
-  const params = {
-    host: chromecast.host,
-    port: chromecast.port,
-    address: chromecast.addresses[0],
-    friendlyName: chromecast.txtRecord.fn,
-    model: chromecast.txtRecord.md,
-    lastCast: chromecast.txtRecord.rs
+  const txtRecord = {}
+  if (chromecast.txt) {
+    chromecast.txt.forEach(record => {
+      const key = record.substr(0, record.indexOf('='))
+      const value = record.substr(record.indexOf('=') + 1)
+      txtRecord[key] = value
+    })
+    if (txtRecord.fn && txtRecord.md) {
+      const params = {
+        host: chromecast.host,
+        port: chromecast.port,
+        address: chromecast.addresses[0],
+        friendlyName: txtRecord.fn,
+        model: txtRecord.md,
+        lastCast: txtRecord.rs
+      }
+      return new Device(Device.TYPES.DEVICE_TYPE_CHROMECAST, chromecast.name, params, Device.STATUS.READY)
+    }
   }
-  return new Device(Device.TYPES.DEVICE_TYPE_CHROMECAST, chromecast.name, params, Device.STATUS.READY)
+  return undefined
 }
 Device.TYPES = {
   DEVICE_TYPE_CHROMECAST: 'DEVICE_TYPE_CHROMECAST'
