@@ -21,6 +21,7 @@ class Chromecast {
       client.launch(DefaultMediaReceiver, (err, player) => {
         if (err) {
           console.error('client.launch error', err)
+          return
         }
 
         const media = [{
@@ -44,8 +45,9 @@ class Chromecast {
         }]
         addStopper(() => {
           try {
-            player.stop()
-            console.log('Stopping player!', player && player.session ? player.session.displayName : 'Unknown', media[0].media.contentId)
+            client.stop(player, () => {
+              console.log('Stopped')
+            })
           } catch (e) {
             console.log('stopper error', e)
           }
