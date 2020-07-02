@@ -23,7 +23,6 @@ class Item {
       case Item.TYPES.TYPE_MEDIA:
         var chromecastDevice = this.devices.getDevice(this.params.destination)
         chromecastDevice.runner.launch(this, next, (stop) => {
-          console.log('Add stopper', stop, this.stopper)
           this.stopper = stop
         })
         break
@@ -38,7 +37,6 @@ class Item {
   }
 
   stop () {
-    console.log('stopper types', this.stopper)
     this.running = false
     this.stopper()
   }
