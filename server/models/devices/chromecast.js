@@ -44,8 +44,8 @@ class Chromecast {
         }]
         addStopper(() => {
           try {
-            console.log('Stopping player!', player.session?.displayName, media[0].media?.contentId)
             player.stop()
+            console.log('Stopping player!', player && player.session ? player.session.displayName : 'Unknown', media[0].media?.contentId)
           } catch (e) {
             console.log('stopper error', e)
           }
