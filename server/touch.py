@@ -3,12 +3,6 @@ import time
 import requests
 import touchphat
 
-print("""
-Touch pHAT: Buttons Demo
-Lights up each LED in turn, then detects your button presses.
-Press a button to see the corresponding LED light up, and the name printed.
-Press Ctrl+C to exit!
-""")
 
 for pad in ['Back','A','B','C','D','Enter']:
     touchphat.set_led(pad, True)
@@ -16,12 +10,25 @@ for pad in ['Back','A','B','C','D','Enter']:
     touchphat.set_led(pad, False)
     time.sleep(0.1)
 
-@touchphat.on_touch(['Back','A', 'B','C','D','Enter'])
-def handle_touch(event):
-    if event.name == 'A':
-        requests.post('http://localhost:3000/playbooks/start', json={'name': 'Bedtime'})
-    if event.name == 'B':
-        requests.post('http://localhost:3000/playbooks/stop', json={'name': 'Bedtime'})
-    print(event.name)
+@touchphat.on_touch(['D'])
+def handle_stop(event):
+    requests.post('http://localhost:3000/playbooks/stop', json={'name': 'Bedtime'})
+    flash('D')
+
+
+@touchphat.on_touch(['A'])
+def handle_start(event):
+    requests.post('http://localhost:3000/playbooks/start', json={'name': 'Bedtime'})
+    flash('A')
+
+
+def flash(pad):
+    for i in range(10):
+        touchphat.set_led(pad, True)
+        time.sleep(0.1)
+        touchphat.set_led(pad, False)
+        time.sleep(0.1)
+    touchphat.set_led(pad, False)
+
 
 signal.pause()
