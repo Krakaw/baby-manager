@@ -20,7 +20,7 @@ def send_request(endpoint, name, pad):
         r = requests.post('http://localhost:3000/playbooks/' + endpoint, json={'name': name}, timeout=2)
         if r.status_code == 200:
             flash([pad])
-            touchphat.set_led('A', True)
+            touchphat.set_led('A', endpoint == 'stop')
         else:
             flash(['Back', 'A', 'B', 'C', 'D', 'Enter'])
     except:
