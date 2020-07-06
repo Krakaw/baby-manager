@@ -15,24 +15,34 @@ class Item {
   run (next) {
     console.log('Running type', this.type)
     this.running = true
-    switch (this.type) {
-      case Item.TYPES.TYPE_RTSP_STREAM:
-        stream.startStream(this.params.url, this.params.port)
-        this.status = Item.STATUS.RTSP_STREAMING
-        break
-      case Item.TYPES.TYPE_MEDIA:
-        var chromecastDevice = this.devices.getDevice(this.params.destination)
-        chromecastDevice.runner.launch(this, next, (stop) => {
-          this.stopper = stop
-        })
-        break
+    try {
+      switch (this.type) {
+        case Item.TYPES.TYPE_RTSP_STREAM:
+          stream.startStream(this.params.url, this.params.port)
+          this.status = Item.STATUS.RTSP_STREAMING
+          break
+        case Item.TYPES.TYPE_MEDIA:
+          var chromecastDevice = this.devices.getDevice(this.params.destination)
+          chromecastDevice.runner.launch(this, next, (stop) => {
+            this.stopper = stop
+          })
+          break
 
-      case Item.TYPES.TYPE_DELAY: {
-        setTimeout(() => {
-          next()
-        }, this.params.timeout)
-        break
+        case Item.TYPES.TYPE_DELAY: {
+          setTimeout(() => {
+            next()
+          }, this.params.timeout)
+        }
+          break
+
+        case Item.TYPES.TYPE_SWITCH: {
+          const ewelinkDevice = this.devices.getDevice(this.params.deviceid)
+          ewelinkDevice.runner.launch(this, next)
+        }
+          break
       }
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -61,12 +71,12 @@ Item.createMedia = (url = '', repeat = Item.REPEAT.REPEAT_OFF, destination = '')
     }
   }
 }
-Item.createSwitch = (url = '', state = Item.SWITCH.SWITCH_OFF) => {
+Item.createSwitch = (deviceid = '', state = Item.SWITCH.SWITCH_OFF) => {
   return {
     name: '',
     type: Item.TYPES.TYPE_SWITCH,
     params: {
-      url,
+      deviceid,
       state
     }
   }
@@ -102,8 +112,8 @@ Item.REPEAT = {
   REPEAT_SINGLE: 'REPEAT_SINGLE'
 }
 Item.SWITCH = {
-  SWITCH_OFF: 'SWITCH_OFF',
-  SWITCH_ON: 'SWITCH_ON'
+  SWITCH_OFF: 'off',
+  SWITCH_ON: 'on'
 }
 Item.STATUS = {
   RTSP_STREAMING: 'RTSP_STREAMING',

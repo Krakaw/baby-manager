@@ -9,7 +9,8 @@ const DEFAULT_CONFIG = {
   playbooks: [
     // Playbook
   ],
-  devices: []
+  devices: [],
+  arp: []
 }
 class Config {
   constructor (path) {
@@ -37,6 +38,15 @@ class Config {
 
   set devices (devices) {
     this._data.devices = devices
+    this.saveConfig()
+  }
+
+  get arp () {
+    return this._data.arp
+  }
+
+  set arp (arp) {
+    this._data.arp = arp
     this.saveConfig()
   }
 

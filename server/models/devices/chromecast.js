@@ -7,9 +7,6 @@ const constants = require('./constants')
 class Chromecast {
   constructor (device) {
     this.device = device
-    this.client = null
-    this.receiver = null
-    this.requestId = 1
   }
 
   launch (item, next, addStopper) {
@@ -84,21 +81,21 @@ class Chromecast {
     })
     return result
   }
-}
 
-Chromecast.scanDevices = async (addDevice) => {
-  this.browser = mdns.createBrowser(mdns.tcp('googlecast'))
+  static async scanDevices (addDevice) {
+    this.browser = mdns.createBrowser(mdns.tcp('googlecast'))
 
-  this.browser.on('ready', () => {
-    this.browser.discover()
-  })
+    this.browser.on('ready', () => {
+      this.browser.discover()
+    })
 
-  this.browser.on('update', (data) => {
-    const device = Chromecast.fromChromecast(data)
-    if (device) {
-      addDevice(device)
-    }
-  })
+    this.browser.on('update', (data) => {
+      const device = Chromecast.fromChromecast(data)
+      if (device) {
+        addDevice(device)
+      }
+    })
+  }
 }
 
 Chromecast.fromChromecast = (chromecast) => {
