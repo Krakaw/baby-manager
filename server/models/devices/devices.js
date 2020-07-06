@@ -1,12 +1,14 @@
-const mdns = require('mdns-js')
 const Device = require('./device')
+const Chromecast = require('./chromecast')
+const Ewelink = require('./ewelink')
+
 class Devices {
   constructor (config) {
     this.config = config
     this.devices = this.config.devices.map(device => {
       return new Device(device.type, device.name, device.params)
     })
-    this.scanChromecasts()
+    this.scanDevices()
   }
 
   getDevice (name) {
@@ -23,19 +25,9 @@ class Devices {
     this.config.devices = this.devices.map(device => device.toJson())
   }
 
-  scanChromecasts () {
-    this.browser = mdns.createBrowser(mdns.tcp('googlecast'))
-
-    this.browser.on('ready', () => {
-      this.browser.discover()
-    })
-
-    this.browser.on('update', (data) => {
-      const device = Device.fromChromecast(data)
-      if (device) {
-        this.addDevice(device)
-      }
-    })
+  scanDevices () {
+    Chromecast.scanDevices(this.addDevice.bind(this))
+    Ewelink.scanDevices(this.addDevice.bind(this))
   }
 }
 

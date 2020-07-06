@@ -1,4 +1,6 @@
 .idea
+server/devices-cache.json
+server/arp-table.json
 server/public/files/
 server/.data.json
 server/.env

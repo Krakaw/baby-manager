@@ -1,5 +1,8 @@
 const Client = require('castv2-client').Client
 const DefaultMediaReceiver = require('castv2-client').DefaultMediaReceiver
+const Device = require('./device')
+const mdns = require('mdns-js')
+const constants = require('./constants')
 
 class Chromecast {
   constructor (device) {
@@ -81,6 +84,44 @@ class Chromecast {
     })
     return result
   }
+}
+
+Chromecast.scanDevices = async (addDevice) => {
+  this.browser = mdns.createBrowser(mdns.tcp('googlecast'))
+
+  this.browser.on('ready', () => {
+    this.browser.discover()
+  })
+
+  this.browser.on('update', (data) => {
+    const device = Chromecast.fromChromecast(data)
+    if (device) {
+      addDevice(device)
+    }
+  })
+}
+
+Chromecast.fromChromecast = (chromecast) => {
+  const txtRecord = {}
+  if (chromecast.txt) {
+    chromecast.txt.forEach(record => {
+      const key = record.substr(0, record.indexOf('='))
+      const value = record.substr(record.indexOf('=') + 1)
+      txtRecord[key] = value
+    })
+    if (txtRecord.fn && txtRecord.md) {
+      const params = {
+        host: chromecast.host,
+        port: chromecast.port,
+        address: chromecast.addresses[0],
+        friendlyName: txtRecord.fn,
+        model: txtRecord.md,
+        lastCast: txtRecord.rs
+      }
+      return new Device(constants.DEVICE_TYPES.CHROMECAST, chromecast.name, params, constants.DEVICE_STATUS.READY)
+    }
+  }
+  return undefined
 }
 
 module.exports = Chromecast
