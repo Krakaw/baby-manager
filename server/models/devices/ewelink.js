@@ -12,8 +12,10 @@ class Ewelink {
     const devicesCache = [this.device.params]
     const arpTable = this.device.config.arp
     const connection = new EwelinkApi({ devicesCache, arpTable })
-    connection.setDevicePowerState(item.params.deviceid, item.params.state).then(r => {
-      console.log('Setting switch', r, item.params.deviceid, item.params.state)
+
+    const state = item.params.state
+    connection.setDevicePowerState(item.params.deviceid, state).then(r => {
+      console.log('Setting switch', r, item.params.deviceid, state)
     }).catch(e => {
       console.error('Error setting switch', e)
     }).finally(() => {
