@@ -2,9 +2,11 @@ const express = require('express')
 const router = express.Router()
 
 module.exports = (playbooks) => {
-  router.post('/start', (req, res) => {
+  router.post('/start/:orName?', (req, res) => {
     const { name } = req.body
-    const playbook = playbooks.find(name)
+    const { orName } = req.params
+    const playbookName = name || orName
+    const playbook = playbooks.find(playbookName)
     if (playbook) {
       playbook.start()
       res.sendStatus(200)
@@ -16,6 +18,7 @@ module.exports = (playbooks) => {
   router.post('/stop', (req, res) => {
     try {
       const { name } = req.body
+
       let playbookLists = []
       if (name) {
         playbookLists.push(playbooks.find(name))

@@ -24,25 +24,26 @@ class Chromecast {
           return
         }
 
-        const mediaPlaylist = [].concat(data.playlist || data).map(data => ({
+        const mediaPlaylist = [].concat(data.playlist || data).map(playlist => ({
           autoplay: true,
-          preloadTime: 3,
-          startTime: 1,
+          preloadTime: playlist.preloadTime || 10,
+          startTime: playlist.startTime || 0,
           activeTrackIds: [],
-          repeatMode: data.repeat,
+          repeatMode: playlist.repeat,
           media: {
-            contentId: data.url,
-            contentType: data.contentType || 'audio/mpeg',
+            contentId: playlist.url,
+            contentType: playlist.contentType || 'audio/mpeg',
             streamType: 'BUFFERED',
             metadata: {
               type: 0,
               metadataType: 0,
-              title: data.title || data.url.split('/').pop(),
-              images: data.images || []
+              title: playlist.title || playlist.url.split('/').pop(),
+              images: playlist.images || []
             }
           }
         }))
 
+        console.log(mediaPlaylist)
         addStopper(() => {
           try {
             client.stop(player, () => {
@@ -55,6 +56,7 @@ class Chromecast {
         })
 
         player.on('status', (status) => {
+          console.log('Player status', status)
           if (data.repeat !== 'REPEAT_SINGLE' && status.idleReason === 'FINISHED' && status.loadingItemId === undefined) {
             console.log('Item completed')
             item.running = false
@@ -67,6 +69,8 @@ class Chromecast {
         player.queueLoad(mediaPlaylist, { startIndex: 0, repeatMode: data.repeat || 'REPEAT_OFF' }, (err, status) => {
           if (err) {
             console.error('player.load error', err)
+          } else {
+
           }
           // console.log('status broadcast = %s', util.inspect(status), ' ')
         })
