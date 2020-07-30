@@ -69,9 +69,12 @@ Item.createMedia = (url = '', repeat = Item.REPEAT.REPEAT_OFF, destination = '')
     name: '',
     type: Item.TYPES.TYPE_MEDIA,
     params: {
-      url,
-      repeat,
-      destination
+      playlist: [{
+        url,
+        repeat,
+        destination
+      }]
+
     }
   }
 }

@@ -16,9 +16,17 @@ module.exports = (playbooks) => {
   router.post('/stop', (req, res) => {
     try {
       const { name } = req.body
-      const playbook = playbooks.find(name)
-      if (playbook) {
-        playbook.stop()
+      const playbookLists = []
+      if (name) {
+        playbookLists.push(playbooks.find(name))
+      } else {
+        playbookLists.concat(playbooks.playbooks)
+      }
+
+      if (playbookLists.length) {
+        playbookLists.forEach(playbook => {
+          playbook.stop()
+        })
         res.sendStatus(200)
       } else {
         res.sendStatus(404)

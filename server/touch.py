@@ -21,9 +21,7 @@ def handle_start(event):
 
 @touchphat.on_touch(['Enter'])
 def handle_stop(event):
-    send_request('stop', 'Bedtime', 'Enter')
-    send_request('stop', 'Short', 'Enter')
-    send_request('stop', 'WhiteNoise', 'Enter')
+    send_request('stop', '', 'Enter')
 
 
 def send_request(endpoint, name, pad):

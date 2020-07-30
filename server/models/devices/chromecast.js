@@ -17,14 +17,14 @@ class Chromecast {
       stop: () => { console.error('Player has not been loaded yet'); return false }
     }
     client.connect({ host, port }, () => {
-      console.log('Connected to ', this.device.params.friendlyName)
+      console.log('Connected to {} on {}:{}', this.device.params.friendlyName, host, port)
       client.launch(DefaultMediaReceiver, (err, player) => {
         if (err) {
           console.error('client.launch error', err)
           return
         }
 
-        const media = [{
+        const mediaPlaylist = [].concat(data.playlist || data).map(data => ({
           autoplay: true,
           preloadTime: 3,
           startTime: 1,
@@ -41,8 +41,8 @@ class Chromecast {
               images: data.images || []
             }
           }
+        }))
 
-        }]
         addStopper(() => {
           try {
             client.stop(player, () => {
@@ -62,9 +62,9 @@ class Chromecast {
           }
           // console.log('Player status', status)
         })
-        console.log('app "%s" launched, loading media %s ...', player.session.displayName, media[0].media.contentId)
+        console.log('app "%s" launched, loading media %s ...', player.session.displayName, mediaPlaylist[0].media.contentId)
 
-        player.queueLoad(media, { startIndex: 0, repeatMode: data.repeat || 'REPEAT_OFF' }, (err, status) => {
+        player.queueLoad(mediaPlaylist, { startIndex: 0, repeatMode: data.repeat || 'REPEAT_OFF' }, (err, status) => {
           if (err) {
             console.error('player.load error', err)
           }
@@ -115,7 +115,7 @@ Chromecast.fromChromecast = (chromecast) => {
         model: txtRecord.md,
         lastCast: txtRecord.rs
       }
-      return new Device(constants.DEVICE_TYPES.CHROMECAST, chromecast.name, params, constants.DEVICE_STATUS.READY)
+      return new Device(constants.DEVICE_TYPES.CHROMECAST, chromecast.fullname, params, constants.DEVICE_STATUS.READY)
     }
   }
   return undefined
