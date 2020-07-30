@@ -5,14 +5,25 @@ import touchphat
 import datetime
 
 
+
 @touchphat.on_touch(['A'])
 def handle_start(event):
     send_request('start', 'Bedtime', 'A')
 
+@touchphat.on_touch(['B'])
+def handle_start(event):
+    send_request('start', 'Short', 'B')
 
-@touchphat.on_touch(['D'])
+@touchphat.on_touch(['C'])
+def handle_start(event):
+    send_request('start', 'WhiteNoise', 'C')
+
+
+@touchphat.on_touch(['Enter'])
 def handle_stop(event):
-    send_request('stop', 'Bedtime', 'D')
+    send_request('stop', 'Bedtime', 'Enter')
+    send_request('stop', 'Short', 'Enter')
+    send_request('stop', 'WhiteNoise', 'Enter')
 
 
 def send_request(endpoint, name, pad):
