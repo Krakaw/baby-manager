@@ -1,4 +1,6 @@
 const stream = require('../../helpers/stream')
+const fetch = require('node-fetch')
+
 class Item {
   constructor (type, name = '', params = {}, devices) {
     this.devices = devices
@@ -28,17 +30,19 @@ class Item {
           })
           break
 
-        case Item.TYPES.TYPE_DELAY: {
+        case Item.TYPES.TYPE_DELAY:
           setTimeout(() => {
             next()
           }, this.params.timeout)
-        }
           break
 
         case Item.TYPES.TYPE_SWITCH: {
           const ewelinkDevice = this.devices.getDevice(this.params.deviceid)
           ewelinkDevice.runner.launch(this, next)
         }
+          break
+        case Item.TYPES.TYPE_WEBHOOK:
+          fetch(this.params.url, this.params.opts)
           break
       }
     } catch (e) {
@@ -101,11 +105,27 @@ Item.createDelay = (timeout) => {
     }
   }
 }
+
+Item.createWebHook = (url = '', opts = {}) => {
+  return {
+    name: '',
+    type: Item.TYPES.TYPE_WEBHOOK,
+    params: {
+      url,
+      opts: {
+        method: 'GET',
+        headers: {},
+        ...opts
+      }
+    }
+  }
+}
 Item.TYPES = {
   TYPE_MEDIA: 'TYPE_MEDIA',
   TYPE_SWITCH: 'TYPE_SWITCH',
   TYPE_RTSP_STREAM: 'TYPE_RTSP_STREAM',
-  TYPE_DELAY: 'TYPE_DELAY'
+  TYPE_DELAY: 'TYPE_DELAY',
+  TYPE_WEBHOOK: 'TYPE_WEBHOOK'
 }
 Item.REPEAT = {
   REPEAT_OFF: 'REPEAT_OFF',
