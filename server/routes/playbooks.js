@@ -16,11 +16,11 @@ module.exports = (playbooks) => {
   router.post('/stop', (req, res) => {
     try {
       const { name } = req.body
-      const playbookLists = []
+      let playbookLists = []
       if (name) {
         playbookLists.push(playbooks.find(name))
       } else {
-        playbookLists.concat(playbooks.playbooks)
+        playbookLists = playbookLists.concat(playbooks.playbooks)
       }
 
       if (playbookLists.length) {
