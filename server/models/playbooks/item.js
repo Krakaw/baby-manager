@@ -1,3 +1,4 @@
+const ShellCommand = require('../../helpers/shell-command')
 const stream = require('../../helpers/stream')
 const fetch = require('node-fetch')
 
@@ -43,6 +44,14 @@ class Item {
           break
         case Item.TYPES.TYPE_WEBHOOK:
           fetch(this.params.url, this.params.opts)
+          break
+        case Item.TYPES.TYPE_SHELL_COMMAND: {
+          const cmd = new ShellCommand()
+          cmd.launch(this, next, (stop) => {
+            this.stopper = stop
+          })
+        }
+
           break
       }
     } catch (e) {
@@ -123,12 +132,29 @@ Item.createWebHook = (url = '', opts = {}) => {
     }
   }
 }
+
+Item.createShellCommand = (command = '', opts = {}) => {
+  return {
+    name: '',
+    type: Item.TYPES.TYPE_SHELL_COMMAND,
+    params: {
+      command,
+      opts: {
+        args: [],
+        stopCommand: null,
+        ...opts
+      }
+    }
+  }
+}
+
 Item.TYPES = {
   TYPE_MEDIA: 'TYPE_MEDIA',
   TYPE_SWITCH: 'TYPE_SWITCH',
   TYPE_RTSP_STREAM: 'TYPE_RTSP_STREAM',
   TYPE_DELAY: 'TYPE_DELAY',
-  TYPE_WEBHOOK: 'TYPE_WEBHOOK'
+  TYPE_WEBHOOK: 'TYPE_WEBHOOK',
+  TYPE_SHELL_COMMAND: 'TYPE_SHELL_COMMAND'
 }
 Item.REPEAT = {
   REPEAT_OFF: 'REPEAT_OFF',
