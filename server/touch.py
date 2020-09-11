@@ -38,13 +38,14 @@ def send_request(endpoint, name, pad):
 
 
 def flash(pads):
-    for i in range(10):
-        for pad in pads:
-            touchphat.set_led(pad, True)
-        time.sleep(0.1)
-        for pad in pads:
-            touchphat.set_led(pad, False)
-        time.sleep(0.1)
+    if not is_night():
+        for i in range(10):
+            for pad in pads:
+                touchphat.set_led(pad, True)
+            time.sleep(0.1)
+            for pad in pads:
+                touchphat.set_led(pad, False)
+            time.sleep(0.1)
 
 
 def is_night():
