@@ -17,7 +17,6 @@ class ShellCommand {
       } else {
         exec(`kill -9 ${pid}`)
       }
-      next()
     })
   }
 }
