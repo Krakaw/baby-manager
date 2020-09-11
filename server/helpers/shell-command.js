@@ -6,6 +6,7 @@ class ShellCommand {
     const pid = process.pid
     console.log('Spawned: ', pid, '[', item.params.command, item.params.opts.args, ']')
     process.on('exit', (code) => {
+      console.log('Process', pid, 'exited with code:', code)
       addStopper(() => {
         console.log('Process already exited with code: ', code)
       })
