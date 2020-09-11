@@ -9,6 +9,7 @@ class ShellCommand {
       addStopper(() => {
         console.log('Process already exited with code: ', code)
       })
+      next()
     })
     addStopper(() => {
       if (item.params.opts.stopCommand) {
@@ -16,6 +17,7 @@ class ShellCommand {
       } else {
         exec(`kill -9 ${pid}`)
       }
+      next()
     })
   }
 }
