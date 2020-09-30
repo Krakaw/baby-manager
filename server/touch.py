@@ -8,7 +8,10 @@ import datetime
 
 @touchphat.on_touch(['A'])
 def handle_start(event):
-    send_request('start', 'Bedtime', 'A')
+    playbook = "Bedtime"
+    if use_night_mode():
+        playbook += "Night"
+    send_request('start', playbook, 'A')
 
 @touchphat.on_touch(['B'])
 def handle_start(event):
@@ -48,11 +51,15 @@ def flash(pads):
             time.sleep(0.1)
 
 
-def is_night():
+def is_night(night=18, morning=7 ):
     now = datetime.datetime.now()
-    today6pm = now.replace(hour=18, minute=0, second=0, microsecond=0)
-    today7am = now.replace(hour=7, minute=0, second=0, microsecond=0)
-    return now > today6pm or now < today7am
+    today_night = now.replace(hour=night, minute=0, second=0, microsecond=0)
+    today_morning = now.replace(hour=morning, minute=0, second=0, microsecond=0)
+    return now > today_night or now < today_morning
+
+
+def use_night_mode():
+    return is_night(night=20, morning=7)
 
 
 def night_off():
