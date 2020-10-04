@@ -1,0 +1,17 @@
+[Unit]
+Description=Baby goes what Server
+After=network.target
+#Wants=network.target
+
+[Service]
+PIDFile=/tmp/baby_goes_what-99.pid
+User=ubuntu
+Group=ubuntu
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=/home/ubuntu/baby_goes_what_home/server
+ExecStart=/usr/local/bin/npm run start
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
