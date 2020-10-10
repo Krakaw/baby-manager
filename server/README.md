@@ -12,3 +12,12 @@
 
 [Power Bank](https://www.takealot.com/adata-20-000-mah-power-bank-black/PLID46639321) Make it mobile
 
+### Installing
+
+Touch service
+
+```bash
+sudo cp ./scripts/systemd/touch.service /etc/systemd/system/touch.service
+sudo systemctl enable touch.service
+sudo systemctl start touch.service
+```
