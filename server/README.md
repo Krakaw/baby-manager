@@ -22,3 +22,12 @@ sudo cp ./scripts/systemd/touch.service /etc/systemd/system/touch.service
 sudo systemctl enable touch.service
 sudo systemctl start touch.service
 ```
+
+API Service
+
+```bash
+# Make sure this dir is correct in the baby-goes-what.service file
+sudo cp ./scripts/systemd/baby-goes-what.service /etc/systemd/system/baby-goes-what.service
+sudo systemctl enable baby-goes-what.service
+sudo systemctl start baby-goes-what.service
+```
