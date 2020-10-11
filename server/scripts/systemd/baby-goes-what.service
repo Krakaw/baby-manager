@@ -1,7 +1,6 @@
 [Unit]
 Description=Baby goes what Server
 After=network.target
-#Wants=network.target
 
 [Service]
 PIDFile=/tmp/baby_goes_what-99.pid
