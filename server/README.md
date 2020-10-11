@@ -17,6 +17,7 @@
 Touch service
 
 ```bash
+# Make sure this dir is correct in the touch.service file
 sudo cp ./scripts/systemd/touch.service /etc/systemd/system/touch.service
 sudo systemctl enable touch.service
 sudo systemctl start touch.service
