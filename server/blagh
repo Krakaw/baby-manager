@@ -1,0 +1,16 @@
+[Unit]
+Description=Baby goes what Touch
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+PIDFile=/tmp/touch-99.pid
+User=ubuntu
+Group=ubuntu
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=/Volumes/Debug/workspace/baby-goes-what-home/server
+ExecStart=python /Volumes/Debug/workspace/baby-goes-what-home/server/touch.py
+
+[Install]
+WantedBy=multi-user.target
