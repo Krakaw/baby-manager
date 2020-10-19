@@ -3,12 +3,14 @@ const stream = require('../../helpers/stream')
 const fetch = require('node-fetch')
 
 class Item {
-  constructor (type, name = '', params = {}, devices) {
+  constructor (item, devices) {
+    const { type, name = '', params = {}, async = false } = item
     this.devices = devices
-    this.status = null
     this.type = type
     this.name = name
+    this.async = async
     this.params = params
+    this.status = null
     this.running = false
     this.stopper = () => {
       console.log('No stopper loaded for %s', this.name)
@@ -16,6 +18,11 @@ class Item {
   }
 
   run (next) {
+    let asyncNext = () => {}
+    if (this.async) {
+      asyncNext = next
+      next = () => {}
+    }
     console.log('Running type', this.type)
     this.running = true
     try {
@@ -46,9 +53,10 @@ class Item {
           fetch(this.params.url, this.params.opts).then(r => {
             r.text().then((body) => {
               console.log('Webhook result', this.params.url, body)
+            }).finally(() => {
+              next()
             })
           })
-          next()
           break
         case Item.TYPES.TYPE_SHELL_COMMAND: {
           const cmd = new ShellCommand()
@@ -61,6 +69,8 @@ class Item {
       }
     } catch (e) {
       console.error(e)
+    } finally {
+      asyncNext()
     }
   }
 

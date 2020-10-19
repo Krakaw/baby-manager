@@ -3,7 +3,7 @@ class Playbook {
   constructor (name = '', items = [], devices) {
     this.status = null
     this.name = name
-    this.items = items.map(i => new Item(i.type, i.name, i.params, devices))
+    this.items = items.map(i => new Item(i, devices))
     this.queue = []
     this.stopped = false
     this.current = null
