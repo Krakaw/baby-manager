@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "castv2-client": "^1.2.0",
-    "chrome-launcher": "^0.13.2",
+    "chrome-launcher": "^0.13.4",
     "chrome-remote-interface": "^0.28.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
-    "ewelink-api": "^3.0.0",
+    "ewelink-api": "^3.1.1",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
@@ -23,16 +23,16 @@
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.1",
     "node-rtsp-stream": "0.0.9",
-    "ws": "^7.3.0"
+    "ws": "^7.3.1"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.5"
   }
 }
