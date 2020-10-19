@@ -1,11 +1,14 @@
 const Item = require('./item')
 class Playbook {
-  constructor (name = '', items = [], devices) {
+  constructor (playbook, devices) {
+    const { name = '', items = [], stopItems = [] } = playbook
     this.status = null
     this.name = name
     this.items = items.map(i => new Item(i, devices))
+    this.stopItems = stopItems.map(i => new Item(i, devices))
     this.queue = []
     this.stopped = false
+    this.runningStoppedItems = false
     this.current = null
   }
 
@@ -28,7 +31,7 @@ class Playbook {
   }
 
   next () {
-    if (this.queue.length && !this.stopped) {
+    if (this.queue.length && (this.runningStoppedItems || !this.stopped)) {
       this.current = this.queue.shift()
       console.log('Running item', this.current.name)
       this.current.run(this.next.bind(this))
@@ -38,7 +41,12 @@ class Playbook {
   }
 
   end () {
-
+    if (this.runningStoppedItems) {
+      return
+    }
+    this.runningStoppedItems = true
+    this.queue = [].concat(this.stopItems)
+    this.next()
   }
 
   toJson () {

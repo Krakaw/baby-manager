@@ -20,6 +20,7 @@ module.exports = (playbooks) => {
       const { name } = req.body
       const { orName } = req.params
       const playbookName = name || orName
+
       let playbookLists = []
       if (playbookName) {
         playbookLists.push(playbooks.find(playbookName))

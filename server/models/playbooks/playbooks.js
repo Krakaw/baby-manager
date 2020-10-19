@@ -4,7 +4,7 @@ const Item = require('./item')
 class Playbooks {
   constructor (config, devices) {
     this.config = config
-    this.playbooks = this.config.playbooks.map(playbook => new Playbook(playbook.name, playbook.items, devices))
+    this.playbooks = this.config.playbooks.map(playbook => new Playbook(playbook, devices))
   }
 
   find (name) {
