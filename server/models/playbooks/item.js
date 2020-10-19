@@ -43,7 +43,12 @@ class Item {
         }
           break
         case Item.TYPES.TYPE_WEBHOOK:
-          fetch(this.params.url, this.params.opts)
+          fetch(this.params.url, this.params.opts).then(r => {
+            r.text().then((body) => {
+              console.log('Webhook result', this.params.url, body)
+            })
+          })
+          next()
           break
         case Item.TYPES.TYPE_SHELL_COMMAND: {
           const cmd = new ShellCommand()

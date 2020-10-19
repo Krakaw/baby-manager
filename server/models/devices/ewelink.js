@@ -24,12 +24,17 @@ class Ewelink {
   }
 
   static async scanDevices (addDevice, config) {
+    const { EWELINK_EMAIL, EWELINK_PASSWORD, EWELINK_REGION } = process.env
+    if (!EWELINK_EMAIL || !EWELINK_PASSWORD) {
+      console.log('No Ewelink credentials, ignoring scan.')
+      return
+    }
     try {
       console.log('Starting ewelink scanning')
       const connection = new EwelinkApi({
-        email: process.env.EWELINK_EMAIL,
-        password: process.env.EWELINK_PASSWORD,
-        region: process.env.EWELINK_REGION || 'us'
+        email: EWELINK_EMAIL,
+        password: EWELINK_PASSWORD,
+        region: EWELINK_REGION || 'us'
       })
       const devices = await connection.getDevices()
       devices.forEach(device => {
