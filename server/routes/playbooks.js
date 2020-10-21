@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 module.exports = (playbooks) => {
-  router.post('/start/:orName?', (req, res) => {
+  router.all('/start/:orName?', (req, res) => {
     const { name } = req.body
     const { orName } = req.params
     const playbookName = name || orName
@@ -15,7 +15,7 @@ module.exports = (playbooks) => {
     }
   })
 
-  router.post('/stop/:orName?', (req, res) => {
+  router.all('/stop/:orName?', (req, res) => {
     try {
       const { name } = req.body
       const { orName } = req.params

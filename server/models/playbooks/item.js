@@ -18,10 +18,12 @@ class Item {
   }
 
   run (next) {
-    let asyncNext = () => {}
+    let asyncNext = () => {
+    }
     if (this.async) {
       asyncNext = next
-      next = () => {}
+      next = () => {
+      }
     }
     console.log('Running type', this.type)
     this.running = true
@@ -50,13 +52,17 @@ class Item {
         }
           break
         case Item.TYPES.TYPE_WEBHOOK:
-          fetch(this.params.url, this.params.opts).then(r => {
-            r.text().then((body) => {
+          fetch(this.params.url, this.params.opts)
+            .then((r) => r.text())
+            .then((body) => {
               console.log('Webhook result', this.params.url, body)
-            }).finally(() => {
+            })
+            .catch(e => {
+              console.error('Error in webhook', this.name, e)
+            })
+            .finally(() => {
               next()
             })
-          })
           break
         case Item.TYPES.TYPE_SHELL_COMMAND: {
           const cmd = new ShellCommand()
