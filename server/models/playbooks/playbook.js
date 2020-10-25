@@ -10,6 +10,7 @@ class Playbook {
     this.stopped = false
     this.runningStoppedItems = false
     this.current = null
+    this.debugEndCount = 0
   }
 
   runningItems () {
@@ -41,6 +42,8 @@ class Playbook {
   }
 
   end () {
+    this.debugEndCount++
+    console.log('Debug End Called', this.debugEndCount, 'times')
     if (this.runningStoppedItems) {
       return
     }

@@ -30,7 +30,9 @@ module.exports = (playbooks) => {
 
       if (playbookLists.length) {
         playbookLists.forEach(playbook => {
+          console.log('This playbook is stopped:', playbook.stopped)
           playbook.stop()
+          playbook.end()
         })
         res.sendStatus(200)
       } else {
