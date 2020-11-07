@@ -8,11 +8,15 @@ class Devices {
     this.devices = this.config.devices.map(device => {
       return new Device(device.type, device.name, device.params, undefined, config)
     })
-    this.scanDevices().then(r => {
-      console.log('Finished scanning')
-    }).catch(e => {
-      console.error('Error scanning devices', e)
-    })
+    if (!config.env.IGNORE_DEVICES) {
+      this.scanDevices().then(r => {
+        console.log('Finished scanning')
+      }).catch(e => {
+        console.error('Error scanning devices', e)
+      })
+    } else {
+      console.log('IGNORE_DEVICES env is true, device scan skipped')
+    }
   }
 
   getDevice (name) {

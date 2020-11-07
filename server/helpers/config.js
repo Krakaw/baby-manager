@@ -12,9 +12,20 @@ const DEFAULT_CONFIG = {
   devices: [],
   arp: []
 }
+const DEFAULT_ENV = {
+  IGNORE_DEVICES: false,
+  AUTO_START_STREAMS: true,
+  CONFIG_FILE: '.data.json',
+  PUBLIC_URL: 'http://0.0.0.0:3000',
+  EWELINK_EMAIL: null,
+  EWELINK_PASSWORD: null,
+  EWELINK_REGION: null,
+  LOCAL_NETWORK: '192.168.0.2'
+}
 class Config {
   constructor (path) {
     this.saveDebounce = null
+    this.env = this.loadEnv()
     this._path = path
     this._data = this.loadConfig()
   }
@@ -81,6 +92,14 @@ class Config {
     const streams = this.streams.concat({ ...stream })
     this.streams = streams
     return stream
+  }
+
+  loadEnv () {
+    const env = {}
+    Object.keys(DEFAULT_ENV).forEach(key => {
+      env[key] = process.env[key] || DEFAULT_ENV[key]
+    })
+    return env
   }
 
   loadConfig () {
