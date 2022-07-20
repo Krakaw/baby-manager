@@ -4,7 +4,7 @@ const fetch = require('node-fetch')
 
 class Item {
   constructor (item, devices) {
-    const { type, name = '', params = {}, async = false } = item
+    const { type, name = '', params = {}, async = false, ignoreFail = true } = item
     this.devices = devices
     this.type = type
     this.name = name
@@ -12,6 +12,7 @@ class Item {
     this.params = params
     this.status = null
     this.running = false
+    this.ignoreFail = ignoreFail
     this.stopper = () => {
       console.log('No stopper loaded for %s', this.name)
     }
@@ -61,8 +62,13 @@ class Item {
               console.error('Error in webhook', this.name, e)
             })
             .finally(() => {
-              next()
+              if (!this.async) {
+                next()
+              }
             })
+          if (this.async) {
+            next()
+          }
           break
         case Item.TYPES.TYPE_SHELL_COMMAND: {
           const cmd = new ShellCommand()
@@ -143,6 +149,8 @@ Item.createWebHook = (url = '', opts = {}) => {
   return {
     name: '',
     type: Item.TYPES.TYPE_WEBHOOK,
+    async: true,
+    ignoreFail: true,
     params: {
       url,
       opts: {

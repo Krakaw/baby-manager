@@ -32,6 +32,25 @@ class Config {
     return this._data.playbooks
   }
 
+  get active () {
+    return this._data.active || {}
+  }
+
+  addActivePlaybookItem (playbookIndex, itemIndex) {
+    const active = this._data.active
+    active[playbookIndex] = itemIndex
+    this._data.active = active
+    this.saveConfig()
+  }
+
+  removeActivePlaybook (playbookIndex) {
+    console.log('Removing playbook index', playbookIndex)
+    const active = this._data.active
+    delete active[playbookIndex]
+    this._data.active = active
+    this.saveConfig()
+  }
+
   get devices () {
     return this._data.devices
   }

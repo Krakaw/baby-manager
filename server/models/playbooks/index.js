@@ -8,6 +8,10 @@ module.exports = (config, devices) => {
       item.run().bind(item)
     })
   }
+  // Restart running playbooks
+  Object.keys(config.active).forEach(playbookIndex => {
+    playbooks.playbooks[playbookIndex].start(config.active[playbookIndex])
+  })
   return {
     playbooks,
     Playbooks,

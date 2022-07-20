@@ -1,7 +1,8 @@
 const Item = require('./item')
 class Playbook {
-  constructor (playbook, devices) {
+  constructor (playbook, devices, config, playbookIndex) {
     const { name = '', items = [], stopItems = [] } = playbook
+    this.config = config
     this.status = null
     this.name = name
     this.items = items.map(i => new Item(i, devices))
@@ -11,15 +12,19 @@ class Playbook {
     this.runningStoppedItems = false
     this.current = null
     this.debugEndCount = 0
+    this.playbookIndex = playbookIndex
+    this.activeItemIndex = 0
   }
 
   runningItems () {
     return this.items.filter(i => i.running)
   }
 
-  start () {
+  start (startAtStep = 0) {
+    this.activeItemIndex = startAtStep
     this.stopped = false
-    this.queue = [].concat(this.items)
+    const items = [].concat(this.items)
+    this.queue = items.splice(startAtStep)
     this.next()
   }
 
@@ -35,7 +40,13 @@ class Playbook {
     if (this.queue.length && (this.runningStoppedItems || !this.stopped)) {
       this.current = this.queue.shift()
       console.log('Running item', this.current.name)
-      this.current.run(this.next.bind(this))
+      try {
+        this.config.addActivePlaybookItem(this.playbookIndex, this.activeItemIndex)
+        this.activeItemIndex++
+        this.current.run(this.next.bind(this))
+      } catch (e) {
+        console.log('Error running item', e)
+      }
     } else {
       this.end()
     }
@@ -50,6 +61,7 @@ class Playbook {
     this.runningStoppedItems = true
     this.queue = [].concat(this.stopItems)
     this.next()
+    this.config.removeActivePlaybook(this.playbookIndex)
   }
 
   toJson () {

@@ -3,7 +3,24 @@ import time
 import requests
 import touchphat
 import datetime
+import os
 
+
+
+leds = ['Back', 'A', 'B', 'C', 'D', 'Enter']
+shutdown = -1
+
+@touchphat.on_touch(['Back'])
+def handle_back(event):
+    global shutdown
+    if shutdown >= 6:
+        touchphat.all_off()
+        time.sleep(2)
+        os.system("sudo shutdown -h now")
+    else:
+        shutdown = shutdown + 1
+        touchphat.set_led('Back', True)
+        touchphat.set_led(leds[shutdown], True)
 
 
 @touchphat.on_touch(['A'])
@@ -28,6 +45,8 @@ def handle_stop(event):
 
 
 def send_request(endpoint, name, pad):
+    global shutdown
+    shutdown = -1
     try:
         r = requests.post('http://localhost:3000/playbooks/' + endpoint, json={'name': name}, timeout=2)
         if r.status_code == 200:

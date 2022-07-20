@@ -8,11 +8,13 @@ class Devices {
     this.devices = this.config.devices.map(device => {
       return new Device(device.type, device.name, device.params, undefined, config)
     })
-    this.scanDevices().then(r => {
-      console.log('Finished scanning')
-    }).catch(e => {
-      console.error('Error scanning devices', e)
-    })
+    if (parseInt(process.env.SCAN_CHROMECASTS)) {
+      this.scanDevices().then(r => {
+        console.log('Finished scanning')
+      }).catch(e => {
+        console.error('Error scanning devices', e)
+      })
+    }
   }
 
   getDevice (name) {
